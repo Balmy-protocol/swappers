@@ -22,4 +22,11 @@ interface ISwapProxy {
    * @return Whether it is allowlisted for swaps
    */
   function isAllowlisted(address account) external view returns (bool);
+
+  /**
+   * @notice Adds a list of swappers to the allowlist
+   * @dev Can only be called by users with the admin role
+   * @param swappers The list of swappers to add
+   */
+  function allowSwappers(address[] calldata swappers) external;
 }
