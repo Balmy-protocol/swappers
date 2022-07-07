@@ -38,4 +38,12 @@ contract SwapProxy is AccessControl, ISwapProxy {
     }
     emit AllowedSwappers(_swappers);
   }
+
+  /// @inheritdoc ISwapProxy
+  function removeSwappersFromAllowlist(address[] calldata _swappers) external onlyRole(ADMIN_ROLE) {
+    for (uint256 i; i < _swappers.length; i++) {
+      isAllowlisted[_swappers[i]] = false;
+    }
+    emit RemoveSwappersFromAllowlist(_swappers);
+  }
 }

@@ -11,6 +11,12 @@ interface ISwapProxy {
   error ZeroAddress();
 
   /**
+   * @notice Emitted when swappers are removed from the allowlist
+   * @param swappers The swappers that were removed
+   */
+  event RemoveSwappersFromAllowlist(address[] swappers);
+
+  /**
    * @notice Emitted when new swappers are added to the allowlist
    * @param swappers The swappers that were added
    */
@@ -29,4 +35,11 @@ interface ISwapProxy {
    * @param swappers The list of swappers to add
    */
   function allowSwappers(address[] calldata swappers) external;
+
+  /**
+   * @notice Removes given swappers from the allowlist
+   * @dev Can only be called by users with the admin role
+   * @param swappers The list of swappers to remove
+   */
+  function removeSwappersFromAllowlist(address[] calldata swappers) external;
 }

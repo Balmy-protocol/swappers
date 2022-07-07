@@ -84,4 +84,26 @@ describe('SwapProxy', () => {
       role: () => adminRole,
     });
   });
+
+  describe('removeSwappersFromAllowlist', () => {
+    when('swapper is removed', () => {
+      let tx: TransactionResponse;
+      given(async () => {
+        tx = await swapProxy.connect(admin).removeSwappersFromAllowlist([swapper1.address]);
+      });
+      then(`it is reflected correctly`, async () => {
+        expect(await swapProxy.isAllowlisted(swapper1.address)).to.be.false;
+      });
+      then('event is emitted', async () => {
+        await expect(tx).to.emit(swapProxy, 'RemoveSwappersFromAllowlist').withArgs([swapper1.address]);
+      });
+    });
+    behaviours.shouldBeExecutableOnlyByRole({
+      contract: () => swapProxy,
+      funcAndSignature: 'removeSwappersFromAllowlist',
+      params: () => [[swapper1.address]],
+      addressWithRole: () => admin,
+      role: () => adminRole,
+    });
+  });
 });
