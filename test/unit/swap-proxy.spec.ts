@@ -2,8 +2,9 @@ import chai, { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { constants } from 'ethers';
 import { behaviours } from '@utils';
-import { then, when } from '@utils/bdd';
+import { given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { TransactionResponse } from '@ethersproject/abstract-provider';
 import { SwapProxy, SwapProxy__factory, ISwapper } from '@typechained';
 import { snapshot } from '@utils/evm';
 import { FakeContract, smock } from '@defi-wonderland/smock';
@@ -15,14 +16,15 @@ describe('SwapProxy', () => {
   let swapProxyFactory: SwapProxy__factory;
   let swapProxy: SwapProxy;
   let superAdminRole: string, adminRole: string;
-  let swapper: FakeContract<ISwapper>;
+  let swapper1: FakeContract<ISwapper>, swapper2: FakeContract<ISwapper>;
   let snapshotId: string;
 
   before('Setup accounts and contracts', async () => {
     [, superAdmin, admin] = await ethers.getSigners();
     swapProxyFactory = await ethers.getContractFactory('solidity/contracts/SwapProxy.sol:SwapProxy');
-    swapper = await smock.fake<ISwapper>('ISwapper');
-    swapProxy = await swapProxyFactory.deploy([swapper.address], superAdmin.address, [admin.address]);
+    swapper1 = await smock.fake<ISwapper>('ISwapper');
+    swapper2 = await smock.fake<ISwapper>('ISwapper');
+    swapProxy = await swapProxyFactory.deploy([swapper1.address], superAdmin.address, [admin.address]);
     superAdminRole = await swapProxy.SUPER_ADMIN_ROLE();
     adminRole = await swapProxy.ADMIN_ROLE();
     snapshotId = await snapshot.take();
@@ -56,8 +58,30 @@ describe('SwapProxy', () => {
         expect(admin).to.equal(superAdminRole);
       });
       then('initial allowlisted are set correctly', async () => {
-        expect(await swapProxy.isAllowlisted(swapper.address)).to.be.true;
+        expect(await swapProxy.isAllowlisted(swapper1.address)).to.be.true;
       });
+    });
+  });
+
+  describe('allowSwappers', () => {
+    when('swapper is allowed', () => {
+      let tx: TransactionResponse;
+      given(async () => {
+        tx = await swapProxy.connect(admin).allowSwappers([swapper2.address]);
+      });
+      then(`it is reflected correctly`, async () => {
+        expect(await swapProxy.isAllowlisted(swapper2.address)).to.be.true;
+      });
+      then('event is emitted', async () => {
+        await expect(tx).to.emit(swapProxy, 'AllowedSwappers').withArgs([swapper2.address]);
+      });
+    });
+    behaviours.shouldBeExecutableOnlyByRole({
+      contract: () => swapProxy,
+      funcAndSignature: 'allowSwappers',
+      params: () => [[swapper2.address]],
+      addressWithRole: () => admin,
+      role: () => adminRole,
     });
   });
 });
