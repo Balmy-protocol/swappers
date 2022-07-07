@@ -4,7 +4,7 @@
 
 # Mean Finance Swap Proxy
 
-This repository will hold Mean's Swap Proxy. This contract will simply have a list of allowlisted contracts that executes swaps, such as dexes, aggregators or transformers. 
+This repository will hold Mean's Swap Proxy. This contract will simply have a list of allowlisted contracts that executes swaps, such as dexes, aggregators or transformers.
 
 Our contract will simply validate that the target is indeed allowlisted, and delegate the call.
 
