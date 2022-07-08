@@ -210,12 +210,13 @@ describe('Comprehensive Swap Test', () => {
         await swapProxy.connect(admin).allowSwappers([quote.swapperAddress]);
         await WETH.connect(wethWhale).transfer(caller.address, maxAmountIn);
         await WETH.connect(caller).approve(swapProxy.address, maxAmountIn);
-        await swapProxy.connect(caller).swapAndTransferMany({
+        await swapProxy.connect(caller).swapAndTransfer({
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
-          tokensIn: [{ token: WETH.address, amount: maxAmountIn }],
-          tokensOut: [USDC.address],
+          tokenIn: WETH.address,
+          maxAmountIn,
+          tokenOut: USDC.address,
           recipient: recipient.address,
           checkUnspentTokensIn: !!checkUnspentTokensIn,
         });

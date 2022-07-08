@@ -38,6 +38,32 @@ contract SwapProxy is AccessControl, ISwapProxy {
   }
 
   /// @inheritdoc ISwapProxy
+  function swapAndTransfer(SwapAndTransferParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+    // Get token from caller
+    IERC20(_parameters.tokenIn).safeTransferFrom(msg.sender, address(this), _parameters.maxAmountIn);
+
+    // Approve swapper
+    if (IERC20(_parameters.tokenIn).allowance(address(this), _parameters.allowanceTarget) < _parameters.maxAmountIn) {
+      IERC20(_parameters.tokenIn).approve(_parameters.allowanceTarget, 0); // We do this because some tokens (like USDT) fail if we don't
+      IERC20(_parameters.tokenIn).approve(_parameters.allowanceTarget, type(uint256).max);
+    }
+
+    // Execute swap
+    _parameters.swapper.functionCallWithValue(_parameters.swapData, msg.value);
+
+    // Send anything that wasn't spent back to the caller (if necessary)
+    if (_parameters.checkUnspentTokensIn) {
+      uint256 _balance = IERC20(_parameters.tokenIn).balanceOf(address(this));
+      if (_balance > 0) {
+        IERC20(_parameters.tokenIn).safeTransfer(msg.sender, _balance);
+      }
+    }
+
+    // Send swapped to recipient
+    IERC20(_parameters.tokenOut).safeTransfer(_parameters.recipient, IERC20(_parameters.tokenOut).balanceOf(address(this)));
+  }
+
+  /// @inheritdoc ISwapProxy
   function swapAndTransferMany(SwapAndTransferManyParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
     for (uint256 i; i < _parameters.tokensIn.length; i++) {
       IERC20 _token = IERC20(_parameters.tokensIn[i].token);

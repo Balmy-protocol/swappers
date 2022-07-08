@@ -83,6 +83,22 @@ describe('SwapProxy', () => {
   const AMOUNT_OUT = 1234567;
 
   swapAndTransferTest({
+    func: 'swapAndTransfer',
+    defaultParams: async () => {
+      const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
+      return {
+        swapper: swapper1.address,
+        allowanceTarget: swapper1.address,
+        swapData: data!,
+        tokenIn: tokenIn.address,
+        maxAmountIn: AMOUNT_IN,
+        tokenOut: tokenOut.address,
+        recipient: RECIPIENT,
+      };
+    },
+  });
+
+  swapAndTransferTest({
     func: 'swapAndTransferMany',
     defaultParams: async () => {
       const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
@@ -97,7 +113,7 @@ describe('SwapProxy', () => {
     },
   });
 
-  function swapAndTransferTest({ func, defaultParams }: { func: 'swapAndTransferMany'; defaultParams: () => Promise<any> }) {
+  function swapAndTransferTest({ func, defaultParams }: { func: 'swapAndTransferMany' | 'swapAndTransfer'; defaultParams: () => Promise<any> }) {
     describe(func, () => {
       given(async () => {
         tokenIn.allowance.returns(AMOUNT_IN);
