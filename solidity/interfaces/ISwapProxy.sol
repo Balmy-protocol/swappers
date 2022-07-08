@@ -21,6 +21,8 @@ interface ISwapProxy {
     address[] tokensOut;
     // The account that should receive the swapped tokens
     address recipient;
+    // Determine if we need to check if there are any unspent tokens in to return to the caller
+    bool checkUnspentTokensIn;
   }
 
   /// @notice A token with an associated amount
