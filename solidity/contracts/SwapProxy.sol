@@ -17,12 +17,6 @@ contract SwapProxy is AccessControl, ISwapProxy {
   /// @inheritdoc ISwapProxy
   mapping(address => bool) public isAllowlisted;
 
-  /// @dev Reverts if the given swapper is not allowlisted
-  modifier onlyAllowlisted(address _swapper) {
-    if (!isAllowlisted[_swapper]) revert SwapperNotAllowlisted(_swapper);
-    _;
-  }
-
   constructor(
     address[] memory _initialAllowlisted,
     address _superAdmin,
@@ -93,5 +87,11 @@ contract SwapProxy is AccessControl, ISwapProxy {
       isAllowlisted[_swappers[i]] = false;
     }
     emit RemoveSwappersFromAllowlist(_swappers);
+  }
+
+  /// @dev Reverts if the given swapper is not allowlisted
+  modifier onlyAllowlisted(address _swapper) {
+    if (!isAllowlisted[_swapper]) revert SwapperNotAllowlisted(_swapper);
+    _;
   }
 }
