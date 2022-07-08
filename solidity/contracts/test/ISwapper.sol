@@ -7,5 +7,17 @@ interface ISwapper {
     address from,
     address to,
     uint256 amount
-  ) external;
+  ) external payable;
+}
+
+contract Swapper is ISwapper {
+  uint256 public msgValue;
+
+  function executeSwap(
+    address,
+    address,
+    uint256
+  ) external payable {
+    msgValue = msg.value;
+  }
 }

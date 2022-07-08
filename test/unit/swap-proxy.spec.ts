@@ -1,29 +1,33 @@
 import chai, { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { constants } from 'ethers';
+import { constants, utils } from 'ethers';
 import { behaviours } from '@utils';
 import { given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
-import { SwapProxy, SwapProxy__factory, ISwapper } from '@typechained';
+import { SwapProxy, SwapProxy__factory, Swapper__factory, IERC20, Swapper } from '@typechained';
 import { snapshot } from '@utils/evm';
-import { FakeContract, smock } from '@defi-wonderland/smock';
+import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 
 chai.use(smock.matchers);
 
 describe('SwapProxy', () => {
-  let superAdmin: SignerWithAddress, admin: SignerWithAddress;
+  let superAdmin: SignerWithAddress, admin: SignerWithAddress, caller: SignerWithAddress;
   let swapProxyFactory: SwapProxy__factory;
   let swapProxy: SwapProxy;
   let superAdminRole: string, adminRole: string;
-  let swapper1: FakeContract<ISwapper>, swapper2: FakeContract<ISwapper>;
+  let swapper1: MockContract<Swapper>, swapper2: MockContract<Swapper>;
+  let tokenIn: FakeContract<IERC20>, tokenOut: FakeContract<IERC20>;
   let snapshotId: string;
 
   before('Setup accounts and contracts', async () => {
-    [, superAdmin, admin] = await ethers.getSigners();
+    [caller, superAdmin, admin] = await ethers.getSigners();
     swapProxyFactory = await ethers.getContractFactory('solidity/contracts/SwapProxy.sol:SwapProxy');
-    swapper1 = await smock.fake<ISwapper>('ISwapper');
-    swapper2 = await smock.fake<ISwapper>('ISwapper');
+    const swapperFactory = await smock.mock<Swapper__factory>('Swapper');
+    swapper1 = await swapperFactory.deploy();
+    swapper2 = await swapperFactory.deploy();
+    tokenIn = await smock.fake('IERC20');
+    tokenOut = await smock.fake('IERC20');
     swapProxy = await swapProxyFactory.deploy([swapper1.address], superAdmin.address, [admin.address]);
     superAdminRole = await swapProxy.SUPER_ADMIN_ROLE();
     adminRole = await swapProxy.ADMIN_ROLE();
@@ -32,6 +36,14 @@ describe('SwapProxy', () => {
 
   beforeEach('Deploy and configure', async () => {
     await snapshot.revert(snapshotId);
+    tokenIn.transferFrom.reset();
+    tokenIn.allowance.reset();
+    tokenIn.approve.reset();
+    tokenOut.balanceOf.reset();
+    tokenOut.transfer.reset();
+    swapper1.executeSwap.reset();
+    tokenIn.transferFrom.returns(true);
+    tokenOut.transfer.returns(true);
   });
 
   describe('constructor', () => {
@@ -59,6 +71,108 @@ describe('SwapProxy', () => {
       });
       then('initial allowlisted are set correctly', async () => {
         expect(await swapProxy.isAllowlisted(swapper1.address)).to.be.true;
+      });
+    });
+  });
+
+  describe('swapAndTransfer', () => {
+    const RECIPIENT = '0x0000000000000000000000000000000000000001';
+    const AMOUNT_IN = 1000000;
+    const AMOUNT_OUT = 1234567;
+    when('swapper is not allowlisted', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapProxy,
+          func: 'swapAndTransfer',
+          args: [
+            {
+              swapper: swapper2.address,
+              allowanceTarget: swapper1.address,
+              swapData: [],
+              tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
+              tokensOut: [tokenOut.address],
+              recipient: RECIPIENT,
+            },
+          ],
+          message: 'SwapperNotAllowlisted',
+        });
+      });
+    });
+    when('swapper is allowed', () => {
+      const VALUE = utils.parseEther('0.1');
+      let tx: TransactionResponse;
+      given(async () => {
+        tokenIn.allowance.returns(0);
+        tokenOut.balanceOf.returns(AMOUNT_OUT);
+        const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
+        tx = await swapProxy.connect(caller).swapAndTransfer(
+          {
+            swapper: swapper1.address,
+            allowanceTarget: swapper1.address,
+            swapData: data!,
+            tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
+            tokensOut: [tokenOut.address],
+            recipient: RECIPIENT,
+          },
+          { value: VALUE }
+        );
+      });
+      then('tokens were transferred from the caller', () => {
+        expect(tokenIn.transferFrom).to.have.been.calledOnceWith(caller.address, swapProxy.address, AMOUNT_IN);
+      });
+      then('allowance was asked correctly', () => {
+        expect(tokenIn.allowance).to.have.been.calledOnceWith(swapProxy.address, swapper1.address);
+      });
+      then('allowance was increased correctly', () => {
+        expect(tokenIn.approve).to.have.been.calledTwice;
+        expect(tokenIn.approve).to.have.been.calledWith(swapper1.address, 0);
+        expect(tokenIn.approve).to.have.been.calledWith(swapper1.address, constants.MaxUint256);
+      });
+      then('swapper was called correctly', () => {
+        expect(swapper1.executeSwap).to.have.been.calledOnceWith(tokenIn.address, tokenOut.address, AMOUNT_IN);
+      });
+      then('swapper was sent the ether correctly', async () => {
+        expect(await swapper1.msgValue()).to.equal(VALUE);
+      });
+      then('balance for token out tokens was asked correctly', () => {
+        expect(tokenOut.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
+      });
+      then('token out was transferred correctly', () => {
+        expect(tokenOut.transfer).to.have.been.calledOnceWith(RECIPIENT, AMOUNT_OUT);
+      });
+    });
+    when('swapper is allowed and allowance is enough', () => {
+      let tx: TransactionResponse;
+      given(async () => {
+        tokenIn.allowance.returns(AMOUNT_IN);
+        tokenOut.balanceOf.returns(AMOUNT_OUT);
+        const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
+        tx = await swapProxy.connect(caller).swapAndTransfer({
+          swapper: swapper1.address,
+          allowanceTarget: swapper1.address,
+          swapData: data!,
+          tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
+          tokensOut: [tokenOut.address],
+          recipient: RECIPIENT,
+        });
+      });
+      then('tokens were transferred from the caller', () => {
+        expect(tokenIn.transferFrom).to.have.been.calledOnceWith(caller.address, swapProxy.address, AMOUNT_IN);
+      });
+      then('allowance was asked correctly', () => {
+        expect(tokenIn.allowance).to.have.been.calledOnceWith(swapProxy.address, swapper1.address);
+      });
+      then('allowance was not increased', () => {
+        expect(tokenIn.approve).to.not.have.been.called;
+      });
+      then('swapper was called correctly', () => {
+        expect(swapper1.executeSwap).to.have.been.calledOnceWith(tokenIn.address, tokenOut.address, AMOUNT_IN);
+      });
+      then('balance for token out tokens was asked correctly', () => {
+        expect(tokenOut.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
+      });
+      then('token out was transferred correctly', () => {
+        expect(tokenOut.transfer).to.have.been.calledOnceWith(RECIPIENT, AMOUNT_OUT);
       });
     });
   });

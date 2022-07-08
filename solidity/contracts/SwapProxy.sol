@@ -1,15 +1,27 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
+import '@openzeppelin/contracts/interfaces/IERC20.sol';
+import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/access/AccessControl.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
 import '../interfaces/ISwapProxy.sol';
 
 contract SwapProxy is AccessControl, ISwapProxy {
+  using SafeERC20 for IERC20;
+  using Address for address;
+
   bytes32 public constant SUPER_ADMIN_ROLE = keccak256('SUPER_ADMIN_ROLE');
   bytes32 public constant ADMIN_ROLE = keccak256('ADMIN_ROLE');
 
   /// @inheritdoc ISwapProxy
   mapping(address => bool) public isAllowlisted;
+
+  /// @dev Reverts if the given swapper is not allowlisted
+  modifier onlyAllowlisted(address _swapper) {
+    if (!isAllowlisted[_swapper]) revert SwapperNotAllowlisted(_swapper);
+    _;
+  }
 
   constructor(
     address[] memory _initialAllowlisted,
@@ -28,6 +40,31 @@ contract SwapProxy is AccessControl, ISwapProxy {
         isAllowlisted[_initialAllowlisted[i]] = true;
       }
       emit AllowedSwappers(_initialAllowlisted);
+    }
+  }
+
+  /// @inheritdoc ISwapProxy
+  function swapAndTransfer(SwapAndTransferParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+    for (uint256 i; i < _parameters.tokensIn.length; i++) {
+      IERC20 _token = IERC20(_parameters.tokensIn[i].token);
+      uint256 _amount = _parameters.tokensIn[i].amount;
+
+      // Get token from caller
+      _token.safeTransferFrom(msg.sender, address(this), _amount);
+
+      // Approve swapper
+      if (_token.allowance(address(this), _parameters.allowanceTarget) < _amount) {
+        _token.approve(_parameters.allowanceTarget, 0); // We do this because some tokens (like USDT) fail if we don't
+        _token.approve(_parameters.allowanceTarget, type(uint256).max);
+      }
+    }
+
+    // Execute swap
+    _parameters.swapper.functionCallWithValue(_parameters.swapData, msg.value);
+
+    // Send swapped to recipient
+    for (uint256 i; i < _parameters.tokensOut.length; i++) {
+      IERC20(_parameters.tokensOut[i]).safeTransfer(_parameters.recipient, IERC20(_parameters.tokensOut[i]).balanceOf(address(this)));
     }
   }
 

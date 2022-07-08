@@ -7,6 +7,35 @@ pragma solidity >=0.8.7 <0.9.0;
  *         are allowed and which aren't
  */
 interface ISwapProxy {
+  /// @notice The parameters for swap & transfer
+  struct SwapAndTransferParams {
+    // The swapper that will execute the call
+    address swapper;
+    // The account that needs to be approved for token transfers
+    address allowanceTarget;
+    // The actual swap execution
+    bytes swapData;
+    // The tokens that will be swapped, and their max amounts
+    AmountOfToken[] tokensIn;
+    // The tokens that will be received
+    address[] tokensOut;
+    // The account that should receive the swapped tokens
+    address recipient;
+  }
+
+  /// @notice A token with an associated amount
+  struct AmountOfToken {
+    address token;
+    uint256 amount;
+  }
+
+  /**
+   * @notice Thrown when a swapper that is not allowlisted tries to execute a swap
+   * @param swapper The swapper that was not allowlisted
+   */
+
+  error SwapperNotAllowlisted(address swapper);
+
   /// @notice Thrown when one of the parameters is a zero address
   error ZeroAddress();
 
@@ -28,6 +57,16 @@ interface ISwapProxy {
    * @return Whether it is allowlisted for swaps
    */
   function isAllowlisted(address account) external view returns (bool);
+
+  /**
+   * @notice Executes a swap and sends the swapped funds to the given recipient
+   *         This function is basically a wrapper that acts as a proxy between the caller and the swapper.
+   *         It is meant to add swap & transfer capabilities to swappers that do not support it natively
+   * @dev This function can only be called by swappers that are allowlisted
+   *      This function does not delegate the call to the swapper
+   * @param params The parameters for the swap and transfer
+   */
+  function swapAndTransfer(SwapAndTransferParams calldata params) external payable;
 
   /**
    * @notice Adds a list of swappers to the allowlist
