@@ -78,180 +78,159 @@ describe('SwapProxy', () => {
     });
   });
 
-  describe('swapAndTransfer', () => {
-    const RECIPIENT = '0x0000000000000000000000000000000000000001';
-    const AMOUNT_IN = 1000000;
-    const AMOUNT_OUT = 1234567;
-    given(async () => {
-      tokenIn.allowance.returns(AMOUNT_IN);
-      tokenOut.balanceOf.returns(AMOUNT_OUT);
-    });
-    when('swapper is not allowlisted', () => {
-      then('reverts with message', async () => {
-        await behaviours.txShouldRevertWithMessage({
-          contract: swapProxy,
-          func: 'swapAndTransfer',
-          args: [
-            {
-              swapper: swapper2.address,
-              allowanceTarget: swapper1.address,
-              swapData: [],
-              tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
-              tokensOut: [tokenOut.address],
-              recipient: RECIPIENT,
-            },
-          ],
-          message: 'SwapperNotAllowlisted',
-        });
-      });
-    });
-    when('swapper is allowed', () => {
-      const VALUE = utils.parseEther('0.1');
-      let tx: TransactionResponse;
-      given(async () => {
-        tokenIn.allowance.returns(0);
-        const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
-        tx = await swapProxy.connect(caller).swapAndTransfer(
-          {
-            swapper: swapper1.address,
-            allowanceTarget: swapper1.address,
-            swapData: data!,
-            tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
-            tokensOut: [tokenOut.address],
-            recipient: RECIPIENT,
-            checkUnspentTokensIn: false,
-          },
-          { value: VALUE }
-        );
-      });
-      thenTokenInWasTransferredFromTheCallerCorrectly;
-      thenAllowanceWasAskedCorrectly();
-      then('allowance was increased correctly', () => {
-        expect(tokenIn.approve).to.have.been.calledTwice;
-        expect(tokenIn.approve).to.have.been.calledWith(swapper1.address, 0);
-        expect(tokenIn.approve).to.have.been.calledWith(swapper1.address, constants.MaxUint256);
-      });
-      thenSwapWasExecutedCorrectly();
-      then('swapper was sent the ether correctly', async () => {
-        expect(await swapper1.msgValue()).to.equal(VALUE);
-      });
-      thenTokenInWasNotCheckedForUnspentTokens();
-      thenTokenOutWasTransferredCorrectly();
-    });
-    when('swapper is allowed and allowance is enough', () => {
-      let tx: TransactionResponse;
-      given(async () => {
-        const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
-        tx = await swapProxy.connect(caller).swapAndTransfer({
-          swapper: swapper1.address,
-          allowanceTarget: swapper1.address,
-          swapData: data!,
-          tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
-          tokensOut: [tokenOut.address],
-          recipient: RECIPIENT,
-          checkUnspentTokensIn: false,
-        });
-      });
-      thenTokenInWasTransferredFromTheCallerCorrectly;
-      thenAllowanceWasAskedCorrectly();
-      thenAllowanceWasNotIncreased();
-      thenSwapWasExecutedCorrectly();
-      thenTokenInWasNotCheckedForUnspentTokens();
-      thenTokenOutWasTransferredCorrectly();
-    });
-    when('token in must be checked for unspent, but there is nothing there', () => {
-      let tx: TransactionResponse;
-      given(async () => {
-        tokenIn.balanceOf.returns(0);
-        const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
-        tx = await swapProxy.connect(caller).swapAndTransfer({
-          swapper: swapper1.address,
-          allowanceTarget: swapper1.address,
-          swapData: data!,
-          tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
-          tokensOut: [tokenOut.address],
-          recipient: RECIPIENT,
-          checkUnspentTokensIn: true,
-        });
-      });
-      thenTokenInWasTransferredFromTheCallerCorrectly;
-      thenAllowanceWasAskedCorrectly();
-      thenAllowanceWasNotIncreased();
-      then('balance for token in was asked correctly', () => {
-        expect(tokenIn.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
-      });
-      then('token in was not transferred', () => {
-        expect(tokenIn.transfer).to.not.have.been.called;
-      });
-      thenSwapWasExecutedCorrectly();
-      thenTokenOutWasTransferredCorrectly();
-    });
-    when('token in must be checked for unspent, and there were some tokens', () => {
-      const UNSPENT = 10000;
-      let tx: TransactionResponse;
-      given(async () => {
-        tokenIn.balanceOf.returns(UNSPENT);
-        const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
-        tx = await swapProxy.connect(caller).swapAndTransfer({
-          swapper: swapper1.address,
-          allowanceTarget: swapper1.address,
-          swapData: data!,
-          tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
-          tokensOut: [tokenOut.address],
-          recipient: RECIPIENT,
-          checkUnspentTokensIn: true,
-        });
-      });
-      thenTokenInWasTransferredFromTheCallerCorrectly;
-      thenAllowanceWasAskedCorrectly();
-      thenAllowanceWasNotIncreased();
-      then('balance for token in was asked correctly', () => {
-        expect(tokenIn.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
-      });
-      then('token in was transferred correctly', () => {
-        expect(tokenIn.transfer).to.have.been.calledOnceWith(caller.address, UNSPENT);
-      });
-      thenSwapWasExecutedCorrectly();
-      thenTokenOutWasTransferredCorrectly();
-    });
+  const RECIPIENT = '0x0000000000000000000000000000000000000001';
+  const AMOUNT_IN = 1000000;
+  const AMOUNT_OUT = 1234567;
 
-    function thenTokenInWasNotCheckedForUnspentTokens() {
-      then('balance for token in was not checked', () => {
-        expect(tokenIn.balanceOf).to.not.have.been.called;
-      });
-      then('transfer was not executed for token in', () => {
-        expect(tokenIn.transfer).to.not.have.been.called;
-      });
-    }
-    function thenAllowanceWasNotIncreased() {
-      then('allowance was not increased', () => {
-        expect(tokenIn.approve).to.not.have.been.called;
-      });
-    }
-    function thenAllowanceWasAskedCorrectly() {
-      then('allowance was asked correctly', () => {
-        expect(tokenIn.allowance).to.have.been.calledOnceWith(swapProxy.address, swapper1.address);
-      });
-    }
-    function thenTokenInWasTransferredFromTheCallerCorrectly() {
-      then('tokens were transferred from the caller', () => {
-        expect(tokenIn.transferFrom).to.have.been.calledOnceWith(caller.address, swapProxy.address, AMOUNT_IN);
-      });
-    }
-    function thenSwapWasExecutedCorrectly() {
-      then('swapper was called correctly', () => {
-        expect(swapper1.executeSwap).to.have.been.calledOnceWith(tokenIn.address, tokenOut.address, AMOUNT_IN);
-      });
-    }
-    function thenTokenOutWasTransferredCorrectly() {
-      then('balance for token out tokens was asked correctly', () => {
-        expect(tokenOut.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
-      });
-      then('token out was transferred correctly', () => {
-        expect(tokenOut.transfer).to.have.been.calledOnceWith(RECIPIENT, AMOUNT_OUT);
-      });
-    }
+  swapAndTransferTest({
+    func: 'swapAndTransferMany',
+    defaultParams: async () => {
+      const { data } = await swapper1.populateTransaction.executeSwap(tokenIn.address, tokenOut.address, AMOUNT_IN);
+      return {
+        swapper: swapper1.address,
+        allowanceTarget: swapper1.address,
+        swapData: data!,
+        tokensIn: [{ token: tokenIn.address, amount: AMOUNT_IN }],
+        tokensOut: [tokenOut.address],
+        recipient: RECIPIENT,
+      };
+    },
   });
+
+  function swapAndTransferTest({ func, defaultParams }: { func: 'swapAndTransferMany'; defaultParams: () => Promise<any> }) {
+    describe(func, () => {
+      given(async () => {
+        tokenIn.allowance.returns(AMOUNT_IN);
+        tokenOut.balanceOf.returns(AMOUNT_OUT);
+      });
+      when('swapper is not allowlisted', () => {
+        then('reverts with message', async () => {
+          const params = await defaultParams();
+          await behaviours.txShouldRevertWithMessage({
+            contract: swapProxy,
+            func,
+            args: [{ ...params, swapper: swapper2.address }],
+            message: 'SwapperNotAllowlisted',
+          });
+        });
+      });
+      when('swapper is allowed', () => {
+        const VALUE = utils.parseEther('0.1');
+        let tx: TransactionResponse;
+        given(async () => {
+          tokenIn.allowance.returns(0);
+          tx = await swapProxy.connect(caller)[func](await defaultParams(), { value: VALUE });
+        });
+        thenTokenInWasTransferredFromTheCallerCorrectly();
+        thenAllowanceWasAskedCorrectly();
+        then('allowance was increased correctly', () => {
+          expect(tokenIn.approve).to.have.been.calledTwice;
+          expect(tokenIn.approve).to.have.been.calledWith(swapper1.address, 0);
+          expect(tokenIn.approve).to.have.been.calledWith(swapper1.address, constants.MaxUint256);
+        });
+        thenSwapWasExecutedCorrectly();
+        then('swapper was sent the ether correctly', async () => {
+          expect(await swapper1.msgValue()).to.equal(VALUE);
+        });
+        thenTokenInWasNotCheckedForUnspentTokens();
+        thenTokenOutWasTransferredCorrectly();
+      });
+      when('swapper is allowed and allowance is enough', () => {
+        let tx: TransactionResponse;
+        given(async () => {
+          tx = await swapProxy.connect(caller)[func](await defaultParams());
+        });
+        thenTokenInWasTransferredFromTheCallerCorrectly();
+        thenAllowanceWasAskedCorrectly();
+        thenAllowanceWasNotIncreased();
+        thenSwapWasExecutedCorrectly();
+        thenTokenInWasNotCheckedForUnspentTokens();
+        thenTokenOutWasTransferredCorrectly();
+      });
+      when('there token in must be checked, but there is nothing there', () => {
+        let tx: TransactionResponse;
+        given(async () => {
+          tokenIn.balanceOf.returns(0);
+          const params = await defaultParams();
+          tx = await swapProxy.connect(caller)[func]({
+            ...params,
+            checkUnspentTokensIn: true,
+          });
+        });
+        thenTokenInWasTransferredFromTheCallerCorrectly();
+        thenAllowanceWasAskedCorrectly();
+        thenAllowanceWasNotIncreased();
+        then('balance for token in was asked correctly', () => {
+          expect(tokenIn.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
+        });
+        then('token in was not transferred', () => {
+          expect(tokenIn.transfer).to.not.have.been.called;
+        });
+        thenSwapWasExecutedCorrectly();
+        thenTokenOutWasTransferredCorrectly();
+      });
+      when('there token in must be checked, and there was some unspent tokens', () => {
+        const UNSPENT = 10000;
+        let tx: TransactionResponse;
+        given(async () => {
+          tokenIn.balanceOf.returns(UNSPENT);
+          const params = await defaultParams();
+          tx = await swapProxy.connect(caller)[func]({
+            ...params,
+            checkUnspentTokensIn: true,
+          });
+        });
+        thenTokenInWasTransferredFromTheCallerCorrectly();
+        thenAllowanceWasAskedCorrectly();
+        thenAllowanceWasNotIncreased();
+        then('balance for token in was asked correctly', () => {
+          expect(tokenIn.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
+        });
+        then('token in was transferred correctly', () => {
+          expect(tokenIn.transfer).to.have.been.calledOnceWith(caller.address, UNSPENT);
+        });
+        thenSwapWasExecutedCorrectly();
+        thenTokenOutWasTransferredCorrectly();
+      });
+
+      function thenTokenInWasNotCheckedForUnspentTokens() {
+        then('balance for token in was not checked', () => {
+          expect(tokenIn.balanceOf).to.not.have.been.called;
+        });
+        then('transfer was not executed for token in', () => {
+          expect(tokenIn.transfer).to.not.have.been.called;
+        });
+      }
+      function thenAllowanceWasNotIncreased() {
+        then('allowance was not increased', () => {
+          expect(tokenIn.approve).to.not.have.been.called;
+        });
+      }
+      function thenAllowanceWasAskedCorrectly() {
+        then('allowance was asked correctly', () => {
+          expect(tokenIn.allowance).to.have.been.calledOnceWith(swapProxy.address, swapper1.address);
+        });
+      }
+      function thenTokenInWasTransferredFromTheCallerCorrectly() {
+        then('tokens were transferred from the caller', () => {
+          expect(tokenIn.transferFrom).to.have.been.calledOnceWith(caller.address, swapProxy.address, AMOUNT_IN);
+        });
+      }
+      function thenSwapWasExecutedCorrectly() {
+        then('swapper was called correctly', () => {
+          expect(swapper1.executeSwap).to.have.been.calledOnceWith(tokenIn.address, tokenOut.address, AMOUNT_IN);
+        });
+      }
+      function thenTokenOutWasTransferredCorrectly() {
+        then('balance for token out tokens was asked correctly', () => {
+          expect(tokenOut.balanceOf).to.have.been.calledOnceWith(swapProxy.address);
+        });
+        then('token out was transferred correctly', () => {
+          expect(tokenOut.transfer).to.have.been.calledOnceWith(RECIPIENT, AMOUNT_OUT);
+        });
+      }
+    });
+  }
 
   describe('allowSwappers', () => {
     when('swapper is allowed', () => {

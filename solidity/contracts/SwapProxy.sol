@@ -38,7 +38,7 @@ contract SwapProxy is AccessControl, ISwapProxy {
   }
 
   /// @inheritdoc ISwapProxy
-  function swapAndTransfer(SwapAndTransferParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+  function swapAndTransferMany(SwapAndTransferManyParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
     for (uint256 i; i < _parameters.tokensIn.length; i++) {
       IERC20 _token = IERC20(_parameters.tokensIn[i].token);
       uint256 _amount = _parameters.tokensIn[i].amount;
