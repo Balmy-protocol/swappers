@@ -12,6 +12,8 @@ import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finan
 import { snapshot } from '@utils/evm';
 import { setTestChainId } from 'utils/deploy';
 import { quote as zrxQuote } from './dexes/zrx';
+import { swap as oneInchQuote } from './dexes/oneinch';
+import { swap as paraswapQuote } from './dexes/paraswap';
 
 const CHAIN = { chain: 'ethereum', chainId: 1 };
 
@@ -19,6 +21,8 @@ const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const WETH_WHALE_ADDRESS = '0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e';
 const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const SLIPPAGE_PERCENTAGE = 0.3;
+const AMOUNT_EXACT_IN = utils.parseEther('1');
+const AMOUNT_EXACT_OUT = utils.parseUnits('1000', 6);
 
 describe('Comprehensive Swap Test', () => {
   let swapProxy: SwapProxy;
@@ -68,7 +72,7 @@ describe('Comprehensive Swap Test', () => {
         chainId,
         sellToken: tokenIn,
         buyToken: tokenOut,
-        sellAmount: utils.parseEther('1'),
+        sellAmount: AMOUNT_EXACT_IN,
         slippagePercentage: slippagePercentage / 100,
       });
       return {
@@ -89,7 +93,7 @@ describe('Comprehensive Swap Test', () => {
         chainId,
         sellToken: tokenIn,
         buyToken: tokenOut,
-        buyAmount: utils.parseUnits('1000', 6),
+        buyAmount: AMOUNT_EXACT_OUT,
         slippagePercentage: slippagePercentage / 100,
       });
       return {
@@ -101,6 +105,75 @@ describe('Comprehensive Swap Test', () => {
       };
     },
   });
+
+  swapAndTransferTest({
+    swapper: '1inch',
+    type: 'Exact In',
+    getQuote: async ({ tokenIn, tokenOut, chainId, slippagePercentage }) => {
+      const quote = await oneInchQuote(chainId, {
+        tokenIn,
+        tokenOut,
+        amountIn: AMOUNT_EXACT_IN,
+        fromAddress: swapProxy.address,
+        slippage: slippagePercentage,
+        disableEstimate: true,
+        allowPartialFill: false,
+      });
+      return {
+        swapperAddress: quote.tx.to,
+        allowanceTarget: quote.tx.to,
+        amountIn: quote.fromTokenAmount,
+        amountOut: quote.toTokenAmount,
+        data: quote.tx.data,
+      };
+    },
+  });
+
+  swapAndTransferTest({
+    swapper: 'Paraswap',
+    type: 'Exact In',
+    getQuote: async ({ tokenIn, tokenOut, chainId, slippagePercentage }) => {
+      const quote = await paraswapQuote({
+        srcToken: tokenIn,
+        destToken: tokenOut,
+        amount: AMOUNT_EXACT_IN,
+        userAddress: swapProxy.address,
+        side: 'SELL',
+        network: chainId,
+        slippage: slippagePercentage,
+      });
+      return {
+        swapperAddress: quote.to,
+        allowanceTarget: quote.allowanceTarget,
+        amountIn: quote.srcAmount,
+        amountOut: quote.destAmount,
+        data: quote.data,
+      };
+    },
+  });
+
+  // swapAndTransferTest({
+  //   swapper: 'Paraswap',
+  //   type: 'Exact Out',
+  //   getQuote: async ({ tokenIn, tokenOut, chainId, slippagePercentage }) => {
+  //     const quote = await paraswapQuote({
+  //       srcToken: tokenIn,
+  //       destToken: tokenOut,
+  //       amount: AMOUNT_EXACT_OUT,
+  //       userAddress: swapProxy.address,
+  //       side: 'BUY',
+  //       network: chainId,
+  //       slippage: slippagePercentage
+  //     });
+  //     return {
+  //       swapperAddress: quote.to,
+  //       allowanceTarget: quote.allowanceTarget,
+  //       amountIn: quote.srcAmount,
+  //       amountOut: quote.destAmount,
+  //       data: quote.data,
+  //     };
+  //   },
+  // });
 
   function swapAndTransferTest({
     swapper,
