@@ -152,36 +152,39 @@ describe('Comprehensive Swap Test', () => {
     },
   });
 
-  // swapAndTransferTest({
-  //   swapper: 'Paraswap',
-  //   type: 'Exact Out',
-  //   getQuote: async ({ tokenIn, tokenOut, chainId, slippagePercentage }) => {
-  //     const quote = await paraswapQuote({
-  //       srcToken: tokenIn,
-  //       destToken: tokenOut,
-  //       amount: AMOUNT_EXACT_OUT,
-  //       userAddress: swapProxy.address,
-  //       side: 'BUY',
-  //       network: chainId,
-  //       slippage: slippagePercentage
-  //     });
-  //     return {
-  //       swapperAddress: quote.to,
-  //       allowanceTarget: quote.allowanceTarget,
-  //       amountIn: quote.srcAmount,
-  //       amountOut: quote.destAmount,
-  //       data: quote.data,
-  //     };
-  //   },
-  // });
+  swapAndTransferTest({
+    swapper: 'Paraswap',
+    type: 'Exact Out',
+    checkUnspentTokensIn: true,
+    getQuote: async ({ tokenIn, tokenOut, chainId, slippagePercentage }) => {
+      const quote = await paraswapQuote({
+        srcToken: tokenIn,
+        destToken: tokenOut,
+        amount: AMOUNT_EXACT_OUT,
+        userAddress: swapProxy.address,
+        side: 'BUY',
+        network: chainId,
+        slippage: slippagePercentage,
+      });
+      return {
+        swapperAddress: quote.to,
+        allowanceTarget: quote.allowanceTarget,
+        amountIn: quote.srcAmount,
+        amountOut: quote.destAmount,
+        data: quote.data,
+      };
+    },
+  });
 
   function swapAndTransferTest({
     swapper,
     type,
     getQuote,
+    checkUnspentTokensIn,
   }: {
     swapper: string;
     type: 'Exact In' | 'Exact Out';
+    checkUnspentTokensIn?: boolean;
     getQuote: (_: { tokenIn: string; tokenOut: string; chainId: number; slippagePercentage: number }) => Promise<Quote>;
   }) {
     describe(swapper + ' (' + type + ')', () => {
@@ -214,14 +217,17 @@ describe('Comprehensive Swap Test', () => {
           tokensIn: [{ token: WETH.address, amount: maxAmountIn }],
           tokensOut: [USDC.address],
           recipient: recipient.address,
+          checkUnspentTokensIn: !!checkUnspentTokensIn,
         });
       });
 
       when('swap & transfer is executed through the swap proxy', () => {
-        then(`caller has no 'from' token left`, async () => {
-          const balance = await WETH.balanceOf(caller.address);
-          expect(balance).to.equal(0);
-        });
+        if (!checkUnspentTokensIn) {
+          then(`caller has no 'from' token left`, async () => {
+            const balance = await WETH.balanceOf(caller.address);
+            expect(balance).to.equal(0);
+          });
+        }
         then(`caller has no 'to' token`, async () => {
           const balance = await USDC.balanceOf(caller.address);
           expect(balance).to.equal(0);

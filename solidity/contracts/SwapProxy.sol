@@ -17,12 +17,6 @@ contract SwapProxy is AccessControl, ISwapProxy {
   /// @inheritdoc ISwapProxy
   mapping(address => bool) public isAllowlisted;
 
-  /// @dev Reverts if the given swapper is not allowlisted
-  modifier onlyAllowlisted(address _swapper) {
-    if (!isAllowlisted[_swapper]) revert SwapperNotAllowlisted(_swapper);
-    _;
-  }
-
   constructor(
     address[] memory _initialAllowlisted,
     address _superAdmin,
@@ -62,6 +56,17 @@ contract SwapProxy is AccessControl, ISwapProxy {
     // Execute swap
     _parameters.swapper.functionCallWithValue(_parameters.swapData, msg.value);
 
+    // Send anything that wasn't spent back to the caller (if necessary)
+    if (_parameters.checkUnspentTokensIn) {
+      for (uint256 i; i < _parameters.tokensIn.length; i++) {
+        IERC20 _token = IERC20(_parameters.tokensIn[i].token);
+        uint256 _balance = _token.balanceOf(address(this));
+        if (_balance > 0) {
+          _token.safeTransfer(msg.sender, _balance);
+        }
+      }
+    }
+
     // Send swapped to recipient
     for (uint256 i; i < _parameters.tokensOut.length; i++) {
       IERC20(_parameters.tokensOut[i]).safeTransfer(_parameters.recipient, IERC20(_parameters.tokensOut[i]).balanceOf(address(this)));
@@ -82,5 +87,11 @@ contract SwapProxy is AccessControl, ISwapProxy {
       isAllowlisted[_swappers[i]] = false;
     }
     emit RemoveSwappersFromAllowlist(_swappers);
+  }
+
+  /// @dev Reverts if the given swapper is not allowlisted
+  modifier onlyAllowlisted(address _swapper) {
+    if (!isAllowlisted[_swapper]) revert SwapperNotAllowlisted(_swapper);
+    _;
   }
 }
