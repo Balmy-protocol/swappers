@@ -147,7 +147,7 @@ describe('SwapProxy', () => {
         thenTokenInWasNotCheckedForUnspentTokens();
         thenTokenOutWasTransferredCorrectly();
       });
-      when('there token in must be checked, but there is nothing there', () => {
+      when('token in must be checked unspent, but there is nothing there', () => {
         let tx: TransactionResponse;
         given(async () => {
           tokenIn.balanceOf.returns(0);
@@ -169,7 +169,7 @@ describe('SwapProxy', () => {
         thenSwapWasExecutedCorrectly();
         thenTokenOutWasTransferredCorrectly();
       });
-      when('there token in must be checked, and there was some unspent tokens', () => {
+      when('there token in must be checked for unspent, and there were some unspent tokens', () => {
         const UNSPENT = 10000;
         let tx: TransactionResponse;
         given(async () => {
