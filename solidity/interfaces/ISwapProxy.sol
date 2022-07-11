@@ -7,8 +7,8 @@ pragma solidity >=0.8.7 <0.9.0;
  *         are allowed and which aren't
  */
 interface ISwapProxy {
-  /// @notice The parameters for swap & transfer
-  struct SwapAndTransferParams {
+  /// @notice The parameters for swap & transfer (many)
+  struct SwapAndTransferManyParams {
     // The swapper that will execute the call
     address swapper;
     // The account that needs to be approved for token transfers
@@ -68,7 +68,7 @@ interface ISwapProxy {
    *      This function does not delegate the call to the swapper
    * @param params The parameters for the swap and transfer
    */
-  function swapAndTransfer(SwapAndTransferParams calldata params) external payable;
+  function swapAndTransferMany(SwapAndTransferManyParams calldata params) external payable;
 
   /**
    * @notice Adds a list of swappers to the allowlist
