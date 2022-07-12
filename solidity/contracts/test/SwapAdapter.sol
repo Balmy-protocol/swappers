@@ -5,4 +5,8 @@ import '../SwapAdapter.sol';
 
 contract SwapAdapterMock is SwapAdapter {
   constructor(address _swapperRegistry) SwapAdapter(_swapperRegistry) {}
+
+  function internalTakeFromMsgSender(IERC20 _token, uint256 _amount) external {
+    _takeFromMsgSender(_token, _amount);
+  }
 }
