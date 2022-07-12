@@ -127,7 +127,7 @@ describe('SwapperRegistry', () => {
         tx = await swapperRegistry.connect(admin).allowSupplementaryAllowanceTargets([NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]);
       });
       then(`it is reflected correctly`, async () => {
-        expect(await swapperRegistry.isSupplementaryAllowanceTarget(NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.true;
+        expect(await swapperRegistry.isValidAllowanceTarget(NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.true;
       });
       then('event is emitted', async () => {
         await expect(tx).to.emit(swapperRegistry, 'AllowedSupplementaryAllowanceTargets').withArgs([NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]);

@@ -73,7 +73,7 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
   /// @inheritdoc ISwapperRegistry
   function allowSupplementaryAllowanceTargets(address[] calldata _allowanceTargets) external onlyRole(ADMIN_ROLE) {
     for (uint256 i; i < _allowanceTargets.length; i++) {
-      isSupplementaryAllowanceTarget[_allowanceTargets[i]] = true;
+      _accountRole[_allowanceTargets[i]] = Role.SUPPLEMENTARY_ALLOWANCE_TARGET;
     }
     emit AllowedSupplementaryAllowanceTargets(_allowanceTargets);
   }
