@@ -12,6 +12,7 @@ describe('SwapperRegistry', () => {
   const ALLOWED_SWAPPER = '0x0000000000000000000000000000000000000001';
   const NOT_ALLOWED_SWAPPER = '0x0000000000000000000000000000000000000002';
   const SUPPLEMENTARY_ALLOWANCE_TARGET = '0x0000000000000000000000000000000000000003';
+  const NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET = '0x0000000000000000000000000000000000000003';
 
   let superAdmin: SignerWithAddress, admin: SignerWithAddress, caller: SignerWithAddress;
   let swapperRegistryFactory: SwapperRegistry__factory;
@@ -114,6 +115,28 @@ describe('SwapperRegistry', () => {
       contract: () => swapperRegistry,
       funcAndSignature: 'removeSwappersFromAllowlist',
       params: () => [[ALLOWED_SWAPPER]],
+      addressWithRole: () => admin,
+      role: () => adminRole,
+    });
+  });
+
+  describe('allowSupplementaryAllowanceTargets', () => {
+    when('allowance target is allowed', () => {
+      let tx: TransactionResponse;
+      given(async () => {
+        tx = await swapperRegistry.connect(admin).allowSupplementaryAllowanceTargets([NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]);
+      });
+      then(`it is reflected correctly`, async () => {
+        expect(await swapperRegistry.isSupplementaryAllowanceTarget(NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.true;
+      });
+      then('event is emitted', async () => {
+        await expect(tx).to.emit(swapperRegistry, 'AllowedSupplementaryAllowanceTargets').withArgs([NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]);
+      });
+    });
+    behaviours.shouldBeExecutableOnlyByRole({
+      contract: () => swapperRegistry,
+      funcAndSignature: 'allowSupplementaryAllowanceTargets',
+      params: () => [[NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]],
       addressWithRole: () => admin,
       role: () => adminRole,
     });
