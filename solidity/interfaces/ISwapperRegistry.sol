@@ -30,6 +30,12 @@ interface ISwapperRegistry {
   event AllowedSupplementaryAllowanceTargets(address[] allowanceTargets);
 
   /**
+   * @notice Emitted when supplementary allowance targets are removed from the allowlist
+   * @param allowanceTargets The allowance targets that were removed
+   */
+  event RemovedAllowanceTargetsFromAllowlist(address[] allowanceTargets);
+
+  /**
    * @notice Returns whether a given account is allowlisted for swaps
    * @param account The address to check
    * @return Whether it is allowlisted for swaps
@@ -52,7 +58,7 @@ interface ISwapperRegistry {
   function allowSwappers(address[] calldata swappers) external;
 
   /**
-   * @notice Removes given swappers from the allowlist
+   * @notice Removes the given swappers from the allowlist
    * @dev Can only be called by users with the admin role
    * @param swappers The list of swappers to remove
    */
@@ -64,4 +70,11 @@ interface ISwapperRegistry {
    * @param allowanceTargets The list of allowance targets to add
    */
   function allowSupplementaryAllowanceTargets(address[] calldata allowanceTargets) external;
+
+  /**
+   * @notice Removes the given allowance targets from the allowlist
+   * @dev Can only be called by users with the admin role
+   * @param allowanceTargets The list of allowance targets to remove
+   */
+  function removeSupplementaryAllowanceTargetsFromAllowlist(address[] calldata allowanceTargets) external;
 }

@@ -141,4 +141,26 @@ describe('SwapperRegistry', () => {
       role: () => adminRole,
     });
   });
+
+  describe('removeSupplementaryAllowanceTargetsFromAllowlist', () => {
+    when('swapper is removed', () => {
+      let tx: TransactionResponse;
+      given(async () => {
+        tx = await swapperRegistry.connect(admin).removeSupplementaryAllowanceTargetsFromAllowlist([SUPPLEMENTARY_ALLOWANCE_TARGET]);
+      });
+      then(`it is reflected correctly`, async () => {
+        expect(await swapperRegistry.isSwapperAllowlisted(SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.false;
+      });
+      then('event is emitted', async () => {
+        await expect(tx).to.emit(swapperRegistry, 'RemovedAllowanceTargetsFromAllowlist').withArgs([SUPPLEMENTARY_ALLOWANCE_TARGET]);
+      });
+    });
+    behaviours.shouldBeExecutableOnlyByRole({
+      contract: () => swapperRegistry,
+      funcAndSignature: 'removeSupplementaryAllowanceTargetsFromAllowlist',
+      params: () => [[SUPPLEMENTARY_ALLOWANCE_TARGET]],
+      addressWithRole: () => admin,
+      role: () => adminRole,
+    });
+  });
 });
