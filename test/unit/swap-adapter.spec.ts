@@ -43,8 +43,6 @@ describe('SwapAdapter', () => {
     token.transfer.returns(true);
     token.transferFrom.returns(true);
     registry.isAllowlisted.reset();
-    registry.isAllowlisted.returns(true);
-    swapper.executeSwap.reset();
   });
 
   describe('constructor', () => {
@@ -61,59 +59,6 @@ describe('SwapAdapter', () => {
       then('registry is set correctly', async () => {
         expect(await swapAdapter.SWAPPER_REGISTRY()).to.equal(registry.address);
       });
-    });
-  });
-
-  describe('takeAndSwap', () => {
-    let swapData: string;
-    given(async () => {
-      const { data } = await swapper.populateTransaction.executeSwap(ACCOUNT, ACCOUNT, AMOUNT);
-      swapData = data!;
-    });
-    when('should not check for unspent tokens', () => {
-      given(async () => {
-        await swapAdapter.takeAndSwap({
-          swapper: swapper.address,
-          allowanceTarget: ACCOUNT,
-          swapData: swapData,
-          tokenIn: token.address,
-          maxAmountIn: AMOUNT,
-          checkUnspentTokensIn: false,
-        });
-      });
-      thenTakeFromMsgSenderIsCalledCorrectly(() => ({ token: token.address, amount: AMOUNT }));
-      thenMaxApproveSpenderIsCalledCorrectly(() => ({ token: token.address, spender: ACCOUNT, minAllowance: AMOUNT }));
-      thenExecuteSwapIsCalledCorrectly(() => ({ swapper: swapper.address, swapData }));
-      thenSendBalanceToMsgSenderIsNotCalled();
-    });
-    when('should check for unspent tokens', () => {
-      given(async () => {
-        await swapAdapter.takeAndSwap({
-          swapper: swapper.address,
-          allowanceTarget: ACCOUNT,
-          swapData: swapData,
-          tokenIn: token.address,
-          maxAmountIn: AMOUNT,
-          checkUnspentTokensIn: true,
-        });
-      });
-      thenTakeFromMsgSenderIsCalledCorrectly(() => ({ token: token.address, amount: AMOUNT }));
-      thenMaxApproveSpenderIsCalledCorrectly(() => ({ token: token.address, spender: ACCOUNT, minAllowance: AMOUNT }));
-      thenExecuteSwapIsCalledCorrectly(() => ({ swapper: swapper.address, swapData }));
-      thenSendBalanceToMsgSenderIsCalledCorrectly(() => ({ token: token.address }));
-    });
-    whenSwapperIsNotAllowlistedThenTxReverts({
-      func: 'takeAndSwap',
-      args: () => [
-        {
-          swapper: swapper.address,
-          allowanceTarget: ACCOUNT,
-          swapData: swapData,
-          tokenIn: token.address,
-          maxAmountIn: AMOUNT,
-          checkUnspentTokensIn: true,
-        },
-      ],
     });
   });
 
@@ -251,54 +196,4 @@ describe('SwapAdapter', () => {
       });
     });
   });
-
-  function whenSwapperIsNotAllowlistedThenTxReverts({ func, args }: { func: string; args: () => any[] }) {
-    when('swapper is not allowlisted', () => {
-      given(() => {
-        registry.isAllowlisted.returns(false);
-      });
-      then('reverts with message', async () => {
-        await behaviours.txShouldRevertWithMessage({
-          contract: swapAdapter,
-          func,
-          args: args(),
-          message: 'SwapperNotAllowlisted',
-        });
-      });
-    });
-  }
-  function thenTakeFromMsgSenderIsCalledCorrectly(args: () => { token: string; amount: number }) {
-    then('_takeFromMsgSender is called correctly', async () => {
-      const call = await swapAdapter.takeFromMsgSenderCall();
-      expect(call.token).to.equal(args().token);
-      expect(call.amount).to.equal(args().amount);
-    });
-  }
-  function thenMaxApproveSpenderIsCalledCorrectly(args: () => { token: string; spender: string; minAllowance: number }) {
-    then('_maxApproveSpenderIfNeeded is called correctly', async () => {
-      const call = await swapAdapter.maxApproveSpenderCall();
-      expect(call.token).to.equal(args().token);
-      expect(call.spender).to.equal(args().spender);
-      expect(call.minAllowance).to.equal(args().minAllowance);
-    });
-  }
-  function thenExecuteSwapIsCalledCorrectly(args: () => { swapper: string; swapData: string }) {
-    then('_executeSwap is called correctly', async () => {
-      const call = await swapAdapter.executeSwapCall();
-      expect(call.swapper).to.equal(args().swapper);
-      expect(call.swapData).to.equal(args().swapData);
-    });
-  }
-  function thenSendBalanceToMsgSenderIsCalledCorrectly(args: () => { token: string }) {
-    then('_sendBalanceToMsgSender is called correctly', async () => {
-      const token = await swapAdapter.sendBalanceToMsgSenderCall();
-      expect(token).to.equal(args().token);
-    });
-  }
-  function thenSendBalanceToMsgSenderIsNotCalled() {
-    then('_sendBalanceToMsgSender is not called', async () => {
-      const token = await swapAdapter.sendBalanceToMsgSenderCall();
-      expect(token).to.equal(constants.AddressZero);
-    });
-  }
 });
