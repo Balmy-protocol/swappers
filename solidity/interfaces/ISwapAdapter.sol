@@ -13,6 +13,12 @@ interface ISwapAdapter {
   error ZeroAddress();
 
   /**
+   * @notice Thrown when trying to execute a swap with a swapper that is not allowlisted
+   * @param swapper The swapper that was not allowlisted
+   */
+  error SwapperNotAllowlisted(address swapper);
+
+  /**
    * @notice Returns the address of the swapper registry
    * @dev Cannot be modified
    * @return The address of the swapper registry
