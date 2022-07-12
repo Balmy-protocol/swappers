@@ -43,6 +43,8 @@ describe('SwapAdapter', () => {
     token.transfer.returns(true);
     token.transferFrom.returns(true);
     registry.isSwapperAllowlisted.reset();
+    registry.isValidAllowanceTarget.reset();
+    registry.isValidAllowanceTarget.returns(true);
   });
 
   describe('constructor', () => {
@@ -77,19 +79,40 @@ describe('SwapAdapter', () => {
     when('current allowance is enough', () => {
       given(async () => {
         token.allowance.returns(AMOUNT);
-        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, AMOUNT);
+        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, false, AMOUNT);
       });
       then('allowance is checked correctly', () => {
         expect(token.allowance).to.have.been.calledOnceWith(swapAdapter.address, ACCOUNT);
+      });
+      then('registry is not called', async () => {
+        expect(registry.isValidAllowanceTarget).to.not.have.been.called;
       });
       then('approve is not called', async () => {
         expect(token.approve).to.not.have.been.called;
       });
     });
-    when('current allowance is not enough but its not zero', () => {
+    when('current allowance is not enough and the registry says that the target is invalid', () => {
+      given(() => {
+        token.allowance.returns(AMOUNT - 1);
+        registry.isValidAllowanceTarget.returns(false);
+      });
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapAdapter,
+          func: 'internalMaxApproveSpenderIfNeeded',
+          args: [token.address, ACCOUNT, false, AMOUNT],
+          message: 'InvalidAllowanceTarget',
+        });
+      });
+    });
+    when('the registry says that the target is invalid but the spender had already been validated', () => {
       given(async () => {
         token.allowance.returns(AMOUNT - 1);
-        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, AMOUNT);
+        registry.isValidAllowanceTarget.returns(false);
+        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, true, AMOUNT);
+      });
+      then('registry is not called', async () => {
+        expect(registry.isValidAllowanceTarget).to.not.have.been.called;
       });
       then('allowance is checked correctly', () => {
         expect(token.allowance).to.have.been.calledOnceWith(swapAdapter.address, ACCOUNT);
@@ -100,10 +123,27 @@ describe('SwapAdapter', () => {
         expect(token.approve).to.have.been.calledWith(ACCOUNT, constants.MaxUint256);
       });
     });
+    when('current allowance is not enough but its not zero', () => {
+      given(async () => {
+        token.allowance.returns(AMOUNT - 1);
+        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, false, AMOUNT);
+      });
+      then('allowance is checked correctly', () => {
+        expect(token.allowance).to.have.been.calledOnceWith(swapAdapter.address, ACCOUNT);
+      });
+      then('approve is called twice', async () => {
+        expect(token.approve).to.have.been.calledTwice;
+        expect(token.approve).to.have.been.calledWith(ACCOUNT, 0);
+        expect(token.approve).to.have.been.calledWith(ACCOUNT, constants.MaxUint256);
+      });
+      then('registry is called correctly', async () => {
+        expect(registry.isValidAllowanceTarget).to.have.been.calledOnceWith(ACCOUNT);
+      });
+    });
     when('current allowance is zero', () => {
       given(async () => {
         token.allowance.returns(0);
-        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, AMOUNT);
+        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, ACCOUNT, false, AMOUNT);
       });
       then('allowance is checked correctly', () => {
         expect(token.allowance).to.have.been.calledOnceWith(swapAdapter.address, ACCOUNT);

@@ -28,7 +28,12 @@ abstract contract TakeAndRunSwap is SwapAdapter {
    */
   function takeAndRunSwap(TakeAndRunSwapParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
     _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
-    _maxApproveSpenderIfNeeded(_parameters.tokenIn, _parameters.allowanceTarget, _parameters.maxAmountIn);
+    _maxApproveSpenderIfNeeded(
+      _parameters.tokenIn,
+      _parameters.allowanceTarget,
+      _parameters.swapper == _parameters.allowanceTarget, // If target is a swaper, then it's ok as allowance target
+      _parameters.maxAmountIn
+    );
     _executeSwap(_parameters.swapper, _parameters.swapData);
     if (_parameters.checkUnspentTokensIn) {
       _sendBalanceToRecipient(_parameters.tokenIn, msg.sender);

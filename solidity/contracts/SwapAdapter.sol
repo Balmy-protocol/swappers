@@ -9,6 +9,9 @@ abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
   using Address for address;
 
+  /// @notice Thrown when the allowance target is not allowed by the swapper registry
+  error InvalidAllowanceTarget(address spender);
+
   ISwapperRegistry public immutable SWAPPER_REGISTRY;
 
   constructor(address _swapperRegistry) {
@@ -35,10 +38,14 @@ abstract contract SwapAdapter is ISwapAdapter {
   function _maxApproveSpenderIfNeeded(
     IERC20 _token,
     address _spender,
+    bool _alreadyValidatedSpender,
     uint256 _minAllowance
   ) internal virtual {
     uint256 _allowance = _token.allowance(address(this), _spender);
     if (_allowance < _minAllowance) {
+      if (!_alreadyValidatedSpender && !SWAPPER_REGISTRY.isValidAllowanceTarget(_spender)) {
+        revert InvalidAllowanceTarget(_spender);
+      }
       if (_allowance > 0) {
         _token.approve(_spender, 0); // We do this because some tokens (like USDT) fail if we don't
       }

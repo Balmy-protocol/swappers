@@ -45,6 +45,7 @@ contract('TakeAndRunSwap', () => {
     token.transfer.returns(true);
     token.transferFrom.returns(true);
     registry.isSwapperAllowlisted.returns(true);
+    registry.isValidAllowanceTarget.returns(true);
   });
 
   describe('takeAndRunSwap', () => {
@@ -65,7 +66,7 @@ contract('TakeAndRunSwap', () => {
       }));
       thenMaxApproveSpenderIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ token: token.address, spender: ACCOUNT, minAllowance: AMOUNT }],
+        calls: [{ token: token.address, spender: ACCOUNT, alreadyValidatedSpender: false, minAllowance: AMOUNT }],
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
@@ -78,7 +79,7 @@ contract('TakeAndRunSwap', () => {
       given(async () => {
         await extensions.takeAndRunSwap({
           swapper: swapper.address,
-          allowanceTarget: ACCOUNT,
+          allowanceTarget: swapper.address,
           swapData: swapData,
           tokenIn: token.address,
           maxAmountIn: AMOUNT,
@@ -91,7 +92,7 @@ contract('TakeAndRunSwap', () => {
       }));
       thenMaxApproveSpenderIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ token: token.address, spender: ACCOUNT, minAllowance: AMOUNT }],
+        calls: [{ token: token.address, spender: swapper.address, alreadyValidatedSpender: true, minAllowance: AMOUNT }],
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,

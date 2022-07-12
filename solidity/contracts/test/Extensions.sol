@@ -12,6 +12,7 @@ contract Extensions is TakeAndRunSwap {
   struct MaxApproveSpenderCall {
     IERC20 token;
     address spender;
+    bool alreadyValidatedSpender;
     uint256 minAllowance;
   }
 
@@ -56,10 +57,11 @@ contract Extensions is TakeAndRunSwap {
   function _maxApproveSpenderIfNeeded(
     IERC20 _token,
     address _spender,
+    bool _alreadyValidatedSpender,
     uint256 _minAllowance
   ) internal override {
-    _maxApproveSpenderCalls.push(MaxApproveSpenderCall(_token, _spender, _minAllowance));
-    super._maxApproveSpenderIfNeeded(_token, _spender, _minAllowance);
+    _maxApproveSpenderCalls.push(MaxApproveSpenderCall(_token, _spender, _alreadyValidatedSpender, _minAllowance));
+    super._maxApproveSpenderIfNeeded(_token, _spender, _alreadyValidatedSpender, _minAllowance);
   }
 
   function _executeSwap(address _swapper, bytes calldata _swapData) internal override {
