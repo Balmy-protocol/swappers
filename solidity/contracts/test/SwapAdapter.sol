@@ -9,4 +9,12 @@ contract SwapAdapterMock is SwapAdapter {
   function internalTakeFromMsgSender(IERC20 _token, uint256 _amount) external {
     _takeFromMsgSender(_token, _amount);
   }
+
+  function internalMaxApproveSpenderIfNeeded(
+    IERC20 _token,
+    address _spender,
+    uint256 _minAllowance
+  ) external {
+    _maxApproveSpenderIfNeeded(_token, _spender, _minAllowance);
+  }
 }
