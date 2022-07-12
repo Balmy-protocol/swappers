@@ -17,4 +17,15 @@ abstract contract SwapAdapter is ISwapAdapter {
   function _takeFromMsgSender(IERC20 _token, uint256 _amount) internal virtual {
     _token.safeTransferFrom(msg.sender, address(this), _amount);
   }
+
+  function _maxApproveSpenderIfNeeded(
+    IERC20 _token,
+    address _spender,
+    uint256 _minAllowance
+  ) internal virtual {
+    if (_token.allowance(address(this), _spender) < _minAllowance) {
+      _token.approve(_spender, 0); // We do this because some tokens (like USDT) fail if we don't
+      _token.approve(_spender, type(uint256).max);
+    }
+  }
 }
