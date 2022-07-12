@@ -75,4 +75,9 @@ abstract contract SwapAdapter is ISwapAdapter {
   function _assertSwapperIsAllowlisted(address _swapper) internal view {
     if (!SWAPPER_REGISTRY.isAllowlisted(_swapper)) revert SwapperNotAllowlisted(_swapper);
   }
+
+  modifier onlyAllowlisted(address _swapper) {
+    _assertSwapperIsAllowlisted(_swapper);
+    _;
+  }
 }
