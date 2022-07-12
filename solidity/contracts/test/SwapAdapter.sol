@@ -21,4 +21,8 @@ contract SwapAdapterMock is SwapAdapter {
   function internalExecuteSwap(address _swapper, bytes calldata _swapData) external payable {
     _executeSwap(_swapper, _swapData);
   }
+
+  function internalSendBalanceToRecipient(IERC20 _token, address _recipient) external {
+    _sendBalanceToRecipient(_token, _recipient);
+  }
 }

@@ -37,7 +37,10 @@ describe('SwapAdapter', () => {
     await snapshot.revert(snapshotId);
     token.allowance.reset();
     token.approve.reset();
+    token.balanceOf.reset();
+    token.transfer.reset();
     token.transferFrom.reset();
+    token.transfer.returns(true);
     token.transferFrom.returns(true);
   });
 
@@ -122,6 +125,33 @@ describe('SwapAdapter', () => {
       });
       then('swapper was sent the ether correctly', async () => {
         expect(await swapper.msgValue()).to.equal(VALUE);
+      });
+    });
+  });
+
+  describe('_sendBalanceToRecipient', () => {
+    when('there is no balance', () => {
+      given(async () => {
+        token.balanceOf.returns(0);
+        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+      });
+      then('balance is checked correctly', () => {
+        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+      });
+      then('transfer is not executed', async () => {
+        expect(token.transfer).to.not.have.been.called;
+      });
+    });
+    when('there is some balance', () => {
+      given(async () => {
+        token.balanceOf.returns(AMOUNT);
+        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+      });
+      then('balance is checked correctly', () => {
+        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+      });
+      then('transfer is executed', async () => {
+        expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, AMOUNT);
       });
     });
   });

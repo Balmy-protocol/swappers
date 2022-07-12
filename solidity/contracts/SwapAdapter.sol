@@ -37,4 +37,11 @@ abstract contract SwapAdapter is ISwapAdapter {
   function _executeSwap(address _swapper, bytes calldata _swapData) internal virtual {
     _swapper.functionCallWithValue(_swapData, msg.value);
   }
+
+  function _sendBalanceToRecipient(IERC20 _token, address _recipient) internal virtual {
+    uint256 _balance = _token.balanceOf(address(this));
+    if (_balance > 0) {
+      _token.safeTransfer(_recipient, _balance);
+    }
+  }
 }
