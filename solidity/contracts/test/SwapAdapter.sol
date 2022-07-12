@@ -24,10 +24,16 @@ contract SwapAdapterMock is SwapAdapter {
     IERC20 token;
   }
 
+  struct SendBalanceToRecipientCall {
+    IERC20 token;
+    address recipient;
+  }
+
   TakeFromMsgSenderCall public takeFromMsgSenderCall;
   MaxApproveSpenderCall public maxApproveSpenderCall;
   ExecuteSwapCall public executeSwapCall;
   SendBalanceToMsgSenderCall public sendBalanceToMsgSenderCall;
+  SendBalanceToRecipientCall public sendBalanceToRecipientCall;
 
   constructor(address _swapperRegistry) SwapAdapter(_swapperRegistry) {}
 
@@ -77,6 +83,11 @@ contract SwapAdapterMock is SwapAdapter {
 
   function internalSendBalanceToRecipient(IERC20 _token, address _recipient) external {
     _sendBalanceToRecipient(_token, _recipient);
+  }
+
+  function _sendBalanceToRecipient(IERC20 _token, address _recipient) internal override {
+    sendBalanceToRecipientCall = SendBalanceToRecipientCall(_token, _recipient);
+    super._sendBalanceToRecipient(_token, _recipient);
   }
 
   function internalAssertSwapperIsAllowlisted(address _swapper) external view {

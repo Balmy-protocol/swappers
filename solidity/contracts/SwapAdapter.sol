@@ -26,6 +26,17 @@ abstract contract SwapAdapter is ISwapAdapter {
     }
   }
 
+  /// @inheritdoc ISwapAdapter
+  function takeSwapAndTransfer(TakeSwapAndTransferParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+    _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+    _maxApproveSpenderIfNeeded(_parameters.tokenIn, _parameters.allowanceTarget, _parameters.maxAmountIn);
+    _executeSwap(_parameters.swapper, _parameters.swapData);
+    if (_parameters.checkUnspentTokensIn) {
+      _sendBalanceToMsgSender(_parameters.tokenIn);
+    }
+    _sendBalanceToRecipient(_parameters.tokenOut, _parameters.recipient);
+  }
+
   /**
    * @notice Takes the given amount of tokens from the caller
    * @param _token The token to check
