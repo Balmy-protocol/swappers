@@ -23,8 +23,11 @@ abstract contract SwapAdapter is ISwapAdapter {
     address _spender,
     uint256 _minAllowance
   ) internal virtual {
-    if (_token.allowance(address(this), _spender) < _minAllowance) {
-      _token.approve(_spender, 0); // We do this because some tokens (like USDT) fail if we don't
+    uint256 _allowance = _token.allowance(address(this), _spender);
+    if (_allowance < _minAllowance) {
+      if (_allowance > 0) {
+        _token.approve(_spender, 0); // We do this because some tokens (like USDT) fail if we don't
+      }
       _token.approve(_spender, type(uint256).max);
     }
   }
