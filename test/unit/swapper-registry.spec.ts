@@ -11,6 +11,7 @@ import { snapshot } from '@utils/evm';
 describe('SwapperRegistry', () => {
   const ALLOWED_SWAPPER = '0x0000000000000000000000000000000000000001';
   const NOT_ALLOWED_SWAPPER = '0x0000000000000000000000000000000000000002';
+  const SUPPLEMENTARY_ALLOWANCE_TARGET = '0x0000000000000000000000000000000000000003';
 
   let superAdmin: SignerWithAddress, admin: SignerWithAddress, caller: SignerWithAddress;
   let swapperRegistryFactory: SwapperRegistry__factory;
@@ -21,7 +22,9 @@ describe('SwapperRegistry', () => {
   before('Setup accounts and contracts', async () => {
     [caller, superAdmin, admin] = await ethers.getSigners();
     swapperRegistryFactory = await ethers.getContractFactory('solidity/contracts/SwapperRegistry.sol:SwapperRegistry');
-    swapperRegistry = await swapperRegistryFactory.deploy([ALLOWED_SWAPPER], superAdmin.address, [admin.address]);
+    swapperRegistry = await swapperRegistryFactory.deploy([ALLOWED_SWAPPER], [SUPPLEMENTARY_ALLOWANCE_TARGET], superAdmin.address, [
+      admin.address,
+    ]);
     superAdminRole = await swapperRegistry.SUPER_ADMIN_ROLE();
     adminRole = await swapperRegistry.ADMIN_ROLE();
     snapshotId = await snapshot.take();
@@ -36,7 +39,7 @@ describe('SwapperRegistry', () => {
       then('tx is reverted with reason error', async () => {
         await behaviours.deployShouldRevertWithMessage({
           contract: swapperRegistryFactory,
-          args: [[], constants.AddressZero, []],
+          args: [[], [], constants.AddressZero, []],
           message: 'ZeroAddress',
         });
       });
@@ -54,8 +57,11 @@ describe('SwapperRegistry', () => {
         const admin = await swapperRegistry.getRoleAdmin(adminRole);
         expect(admin).to.equal(superAdminRole);
       });
-      then('initial allowlisted are set correctly', async () => {
-        expect(await swapperRegistry.isAllowlisted(ALLOWED_SWAPPER)).to.be.true;
+      then('initial allowlisted swappers are set correctly', async () => {
+        expect(await swapperRegistry.isSwapperAllowlisted(ALLOWED_SWAPPER)).to.be.true;
+      });
+      then('initial allowlisted allowance targets are set correctly', async () => {
+        expect(await swapperRegistry.isSupplementaryAllowanceTarget(SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.true;
       });
     });
   });
@@ -67,7 +73,7 @@ describe('SwapperRegistry', () => {
         tx = await swapperRegistry.connect(admin).allowSwappers([NOT_ALLOWED_SWAPPER]);
       });
       then(`it is reflected correctly`, async () => {
-        expect(await swapperRegistry.isAllowlisted(NOT_ALLOWED_SWAPPER)).to.be.true;
+        expect(await swapperRegistry.isSwapperAllowlisted(NOT_ALLOWED_SWAPPER)).to.be.true;
       });
       then('event is emitted', async () => {
         await expect(tx).to.emit(swapperRegistry, 'AllowedSwappers').withArgs([NOT_ALLOWED_SWAPPER]);
@@ -89,7 +95,7 @@ describe('SwapperRegistry', () => {
         tx = await swapperRegistry.connect(admin).removeSwappersFromAllowlist([ALLOWED_SWAPPER]);
       });
       then(`it is reflected correctly`, async () => {
-        expect(await swapperRegistry.isAllowlisted(ALLOWED_SWAPPER)).to.be.false;
+        expect(await swapperRegistry.isSwapperAllowlisted(ALLOWED_SWAPPER)).to.be.false;
       });
       then('event is emitted', async () => {
         await expect(tx).to.emit(swapperRegistry, 'RemoveSwappersFromAllowlist').withArgs([ALLOWED_SWAPPER]);

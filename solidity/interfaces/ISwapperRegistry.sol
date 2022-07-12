@@ -4,6 +4,8 @@ pragma solidity >=0.8.7 <0.9.0;
 /**
  * @notice This contract will act as a registry to allowlist swappers. Different contracts from the Mean
  *         ecosystem will ask this contract if an address is a valid swapper or not
+ *         In some cases, swappers have supplementary allowance targets that need ERC20 approvals. We
+ *         will also track those here
  */
 interface ISwapperRegistry {
   /// @notice Thrown when one of the parameters is a zero address
@@ -22,11 +24,24 @@ interface ISwapperRegistry {
   event AllowedSwappers(address[] swappers);
 
   /**
+   * @notice Emitted when new supplementary allowance targets are are added to the allowlist
+   * @param allowanceTargets The allowance targets that were added
+   */
+  event AllowedSupplementaryAllowanceTargets(address[] allowanceTargets);
+
+  /**
    * @notice Returns whether a given account is allowlisted for swaps
    * @param account The address to check
    * @return Whether it is allowlisted for swaps
    */
-  function isAllowlisted(address account) external view returns (bool);
+  function isSwapperAllowlisted(address account) external view returns (bool);
+
+  /**
+   * @notice Returns whether a given account is allowlisted as a supplementary allowance target
+   * @param account The address to check
+   * @return Whether it is allowlisted as a supplementary allowance target
+   */
+  function isSupplementaryAllowanceTarget(address account) external view returns (bool);
 
   /**
    * @notice Adds a list of swappers to the allowlist
