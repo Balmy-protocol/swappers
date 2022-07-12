@@ -22,7 +22,7 @@ contract SwapAdapterMock is SwapAdapter {
     _executeSwap(_swapper, _swapData);
   }
 
-  function internalSendBalanceToMsgSender(IERC20 _token) external {
-    _sendBalanceToMsgSender(_token);
+  function internalSendBalanceToRecipient(IERC20 _token, address _recipient) external {
+    _sendBalanceToRecipient(_token, _recipient);
   }
 }

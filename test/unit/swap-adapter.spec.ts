@@ -129,11 +129,11 @@ describe('SwapAdapter', () => {
     });
   });
 
-  describe('_sendBalanceToMsgSender', () => {
+  describe('_sendBalanceToRecipient', () => {
     when('there is no balance', () => {
       given(async () => {
         token.balanceOf.returns(0);
-        await swapAdapter.internalSendBalanceToMsgSender(token.address);
+        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
       });
       then('balance is checked correctly', () => {
         expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
@@ -145,13 +145,13 @@ describe('SwapAdapter', () => {
     when('there is some balance', () => {
       given(async () => {
         token.balanceOf.returns(AMOUNT);
-        await swapAdapter.internalSendBalanceToMsgSender(token.address);
+        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
       });
       then('balance is checked correctly', () => {
         expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
       });
       then('transfer is executed', async () => {
-        expect(token.transfer).to.have.been.calledOnceWith(caller.address, AMOUNT);
+        expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, AMOUNT);
       });
     });
   });
