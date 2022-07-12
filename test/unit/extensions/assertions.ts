@@ -78,7 +78,7 @@ export function thenSendBalanceToRecipientIsCalledCorrectly(
   });
 }
 
-export function thenSendBalanceToMsgSenderIsNotCalled(contract: () => Extensions) {
+export function thenSendBalanceToRecipientIsNotCalled(contract: () => Extensions) {
   then('_sendBalanceToRecipient is not called', async () => {
     const calls = await contract().sendBalanceToRecipientCalls();
     expect(calls).to.have.lengthOf(0);

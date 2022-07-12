@@ -9,7 +9,7 @@ import {
   thenTakeFromMsgSenderIsCalledCorrectly,
   thenMaxApproveSpenderIsCalledCorrectly,
   thenExecuteSwapIsCalledCorrectly,
-  thenSendBalanceToMsgSenderIsNotCalled,
+  thenSendBalanceToRecipientIsNotCalled,
   thenSendBalanceToRecipientIsCalledCorrectly,
   whenSwapperIsNotAllowlistedThenTxReverts,
 } from './assertions';
@@ -71,7 +71,7 @@ contract('TakeAndRunSwap', () => {
         contract: extensions,
         calls: [{ swapper: swapper.address, swapData }],
       }));
-      thenSendBalanceToMsgSenderIsNotCalled(() => extensions);
+      thenSendBalanceToRecipientIsNotCalled(() => extensions);
     });
 
     when('should check for unspent tokens', () => {
