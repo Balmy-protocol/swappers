@@ -16,6 +16,16 @@ abstract contract SwapAdapter is ISwapAdapter {
     SWAPPER_REGISTRY = ISwapperRegistry(_swapperRegistry);
   }
 
+  /// @inheritdoc ISwapAdapter
+  function takeAndSwap(TakeAndSwapParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+    _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+    _maxApproveSpenderIfNeeded(_parameters.tokenIn, _parameters.allowanceTarget, _parameters.maxAmountIn);
+    _executeSwap(_parameters.swapper, _parameters.swapData);
+    if (_parameters.checkUnspentTokensIn) {
+      _sendBalanceToMsgSender(_parameters.tokenIn);
+    }
+  }
+
   /**
    * @notice Takes the given amount of tokens from the caller
    * @param _token The token to check
@@ -73,5 +83,10 @@ abstract contract SwapAdapter is ISwapAdapter {
    */
   function _assertSwapperIsAllowlisted(address _swapper) internal view {
     if (!SWAPPER_REGISTRY.isAllowlisted(_swapper)) revert SwapperNotAllowlisted(_swapper);
+  }
+
+  modifier onlyAllowlisted(address _swapper) {
+    _assertSwapperIsAllowlisted(_swapper);
+    _;
   }
 }
