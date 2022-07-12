@@ -212,6 +212,21 @@ describe('SwapAdapter', () => {
     });
   });
 
+  describe('_sendBalanceToRecipient', () => {
+    when('the function is called', () => {
+      given(async () => {
+        token.balanceOf.returns(AMOUNT);
+        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+      });
+      then('balance is checked correctly', () => {
+        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+      });
+      then('transfer is executed correctly', async () => {
+        expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, AMOUNT);
+      });
+    });
+  });
+
   describe('_assertSwapperIsAllowlisted', () => {
     when('swapper is allowlisted', () => {
       given(async () => {

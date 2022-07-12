@@ -78,6 +78,16 @@ abstract contract SwapAdapter is ISwapAdapter {
   }
 
   /**
+   * @notice Sends all balance from the token to the given recipient
+   * @dev This function assumes that there is some balance available
+   * @param _token The token to check
+   * @param _recipient The recipient of the tokens
+   */
+  function _sendBalanceToRecipient(IERC20 _token, address _recipient) internal virtual {
+    _token.safeTransfer(_recipient, _token.balanceOf(address(this)));
+  }
+
+  /**
    * @notice Checks if given swapper is allowlisted, and fails if it isn't
    * @param _swapper The swapper to check
    */
