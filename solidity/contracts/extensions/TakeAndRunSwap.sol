@@ -31,7 +31,7 @@ abstract contract TakeAndRunSwap is SwapAdapter {
     _maxApproveSpenderIfNeeded(
       _parameters.tokenIn,
       _parameters.allowanceTarget,
-      _parameters.swapper == _parameters.allowanceTarget, // If target is a swaper, then it's ok as allowance target
+      _parameters.swapper == _parameters.allowanceTarget, // If target is a swapper, then it's ok as allowance target
       _parameters.maxAmountIn
     );
     _executeSwap(_parameters.swapper, _parameters.swapData);
