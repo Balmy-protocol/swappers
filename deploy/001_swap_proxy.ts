@@ -10,7 +10,7 @@ const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnviro
     deployer,
     name: 'SwapProxy',
     salt: 'MF-Swap-Proxy-V1',
-    contract: 'solidity/contracts/SwapProxy.sol:SwapProxy',
+    contract: 'solidity/contracts/SwapProxyOld.sol:SwapProxy',
     bytecode: SwapProxy__factory.bytecode,
     constructorArgs: {
       types: ['address[]', 'address', 'address[]'],
