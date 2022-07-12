@@ -3,9 +3,9 @@ import { ethers } from 'hardhat';
 import { constants } from 'ethers';
 import { behaviours } from '@utils';
 import { given, then, when } from '@utils/bdd';
-import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory } from '@typechained';
+import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
 import { snapshot } from '@utils/evm';
-import { FakeContract, smock } from '@defi-wonderland/smock';
+import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 chai.use(smock.matchers);
@@ -17,6 +17,7 @@ describe('SwapAdapter', () => {
   let caller: SignerWithAddress;
   let swapAdapterFactory: SwapAdapterMock__factory;
   let swapAdapter: SwapAdapterMock;
+  let swapper: MockContract<Swapper>;
   let registry: FakeContract<ISwapperRegistry>;
   let snapshotId: string;
   let token: FakeContract<IERC20>;
@@ -24,6 +25,8 @@ describe('SwapAdapter', () => {
   before('Setup accounts and contracts', async () => {
     [caller] = await ethers.getSigners();
     registry = await smock.fake('ISwapperRegistry');
+    const swapperFactory = await smock.mock<Swapper__factory>('Swapper');
+    swapper = await swapperFactory.deploy();
     swapAdapterFactory = await ethers.getContractFactory('solidity/contracts/test/SwapAdapter.sol:SwapAdapterMock');
     swapAdapter = await swapAdapterFactory.deploy(registry.address);
     token = await smock.fake('IERC20');
@@ -103,6 +106,22 @@ describe('SwapAdapter', () => {
       });
       then('approve is called once', async () => {
         expect(token.approve).to.have.been.calledOnceWith(ACCOUNT, constants.MaxUint256);
+      });
+    });
+  });
+
+  describe('_executeSwap', () => {
+    const VALUE = 123456;
+    when('executing a swap', () => {
+      given(async () => {
+        const { data } = await swapper.populateTransaction.executeSwap(ACCOUNT, ACCOUNT, AMOUNT);
+        await swapAdapter.internalExecuteSwap(swapper.address, data!, { value: VALUE });
+      });
+      then('swapper is called correctly', () => {
+        expect(swapper.executeSwap).to.have.been.calledOnceWith(ACCOUNT, ACCOUNT, AMOUNT);
+      });
+      then('swapper was sent the ether correctly', async () => {
+        expect(await swapper.msgValue()).to.equal(VALUE);
       });
     });
   });

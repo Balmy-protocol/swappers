@@ -2,10 +2,12 @@
 pragma solidity >=0.8.7 <0.9.0;
 
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
 import '../interfaces/ISwapAdapter.sol';
 
 abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
+  using Address for address;
 
   ISwapperRegistry public immutable SWAPPER_REGISTRY;
 
@@ -30,5 +32,9 @@ abstract contract SwapAdapter is ISwapAdapter {
       }
       _token.approve(_spender, type(uint256).max);
     }
+  }
+
+  function _executeSwap(address _swapper, bytes calldata _swapData) internal virtual {
+    _swapper.functionCallWithValue(_swapData, msg.value);
   }
 }
