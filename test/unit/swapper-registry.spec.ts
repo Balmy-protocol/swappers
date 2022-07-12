@@ -60,8 +60,11 @@ describe('SwapperRegistry', () => {
       then('initial allowlisted swappers are set correctly', async () => {
         expect(await swapperRegistry.isSwapperAllowlisted(ALLOWED_SWAPPER)).to.be.true;
       });
-      then('initial allowlisted allowance targets are set correctly', async () => {
-        expect(await swapperRegistry.isSupplementaryAllowanceTarget(SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.true;
+      then('initial allowlisted swappers are set as valid allowance targets', async () => {
+        expect(await swapperRegistry.isValidAllowanceTarget(ALLOWED_SWAPPER)).to.be.true;
+      });
+      then('initial allowlisted allowance targets are set as valid allowance targets', async () => {
+        expect(await swapperRegistry.isValidAllowanceTarget(SUPPLEMENTARY_ALLOWANCE_TARGET)).to.be.true;
       });
     });
   });
@@ -74,6 +77,9 @@ describe('SwapperRegistry', () => {
       });
       then(`it is reflected correctly`, async () => {
         expect(await swapperRegistry.isSwapperAllowlisted(NOT_ALLOWED_SWAPPER)).to.be.true;
+      });
+      then('it is set as a valid allowance target', async () => {
+        expect(await swapperRegistry.isValidAllowanceTarget(NOT_ALLOWED_SWAPPER)).to.be.true;
       });
       then('event is emitted', async () => {
         await expect(tx).to.emit(swapperRegistry, 'AllowedSwappers').withArgs([NOT_ALLOWED_SWAPPER]);
@@ -96,6 +102,9 @@ describe('SwapperRegistry', () => {
       });
       then(`it is reflected correctly`, async () => {
         expect(await swapperRegistry.isSwapperAllowlisted(ALLOWED_SWAPPER)).to.be.false;
+      });
+      then('it is not a valid allowance anymore target', async () => {
+        expect(await swapperRegistry.isValidAllowanceTarget(NOT_ALLOWED_SWAPPER)).to.be.false;
       });
       then('event is emitted', async () => {
         await expect(tx).to.emit(swapperRegistry, 'RemoveSwappersFromAllowlist').withArgs([ALLOWED_SWAPPER]);

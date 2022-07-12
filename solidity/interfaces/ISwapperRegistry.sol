@@ -37,11 +37,12 @@ interface ISwapperRegistry {
   function isSwapperAllowlisted(address account) external view returns (bool);
 
   /**
-   * @notice Returns whether a given account is allowlisted as a supplementary allowance target
+   * @notice Returns whether a given account is a valid allowance target. This would be true
+   *         if the account is either a swapper, or a supplementary allowance target
    * @param account The address to check
-   * @return Whether it is allowlisted as a supplementary allowance target
+   * @return Whether it is a valid allowance target
    */
-  function isSupplementaryAllowanceTarget(address account) external view returns (bool);
+  function isValidAllowanceTarget(address account) external view returns (bool);
 
   /**
    * @notice Adds a list of swappers to the allowlist
