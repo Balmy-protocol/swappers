@@ -25,4 +25,8 @@ contract SwapAdapterMock is SwapAdapter {
   function internalSendBalanceToRecipient(IERC20 _token, address _recipient) external {
     _sendBalanceToRecipient(_token, _recipient);
   }
+
+  function internalAssertSwapperIsAllowlisted(address _swapper) external view {
+    _assertSwapperIsAllowlisted(_swapper);
+  }
 }

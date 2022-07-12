@@ -44,4 +44,8 @@ abstract contract SwapAdapter is ISwapAdapter {
       _token.safeTransfer(_recipient, _balance);
     }
   }
+
+  function _assertSwapperIsAllowlisted(address _swapper) internal view {
+    if (!SWAPPER_REGISTRY.isAllowlisted(_swapper)) revert SwapperNotAllowlisted(_swapper);
+  }
 }
