@@ -11,7 +11,7 @@ import {
   thenExecuteSwapIsCalledCorrectly,
   thenSendBalanceToRecipientIsNotCalled,
   thenSendBalanceToRecipientIsCalledCorrectly,
-  whenSwapperIsNotAllowlistedThenTxReverts,
+  thenAllowlistWasCheckedForSwappers,
 } from './assertions';
 
 chai.use(smock.matchers);
@@ -44,6 +44,7 @@ contract('TakeAndRunSwap', () => {
     await snapshot.revert(snapshotId);
     token.transfer.returns(true);
     token.transferFrom.returns(true);
+    registry.isSwapperAllowlisted.reset();
     registry.isSwapperAllowlisted.returns(true);
     registry.isValidAllowanceTarget.returns(true);
   });
@@ -86,6 +87,10 @@ contract('TakeAndRunSwap', () => {
           checkUnspentTokensIn: true,
         });
       });
+      thenAllowlistWasCheckedForSwappers(() => ({
+        registry,
+        swappers: [swapper.address],
+      }));
       thenTakeFromMsgSenderIsCalledCorrectly(() => ({
         contract: extensions,
         calls: [{ token: token.address, amount: AMOUNT }],
@@ -102,22 +107,6 @@ contract('TakeAndRunSwap', () => {
         contract: extensions,
         calls: [{ token: token.address, recipient: caller.address }],
       }));
-    });
-
-    whenSwapperIsNotAllowlistedThenTxReverts({
-      contract: () => extensions,
-      func: 'takeAndRunSwap',
-      args: () => [
-        {
-          swapper: swapper.address,
-          allowanceTarget: ACCOUNT,
-          swapData: swapData,
-          tokenIn: token.address,
-          maxAmountIn: AMOUNT,
-          checkUnspentTokensIn: true,
-        },
-      ],
-      registry: () => registry,
     });
   });
 });

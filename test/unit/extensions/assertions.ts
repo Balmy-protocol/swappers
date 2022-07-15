@@ -1,34 +1,8 @@
 import { FakeContract } from '@defi-wonderland/smock';
 import { Extensions, ISwapperRegistry } from '@typechained';
-import { behaviours } from '@utils';
-import { when, given, then } from '@utils/bdd';
+import { then } from '@utils/bdd';
 import { expect } from 'chai';
 
-export function whenSwapperIsNotAllowlistedThenTxReverts({
-  contract,
-  func,
-  args,
-  registry,
-}: {
-  contract: () => Extensions;
-  func: string;
-  args: () => any[];
-  registry: () => FakeContract<ISwapperRegistry>;
-}) {
-  when('swapper is not allowlisted', () => {
-    given(() => {
-      registry().isSwapperAllowlisted.returns(false);
-    });
-    then('reverts with message', async () => {
-      await behaviours.txShouldRevertWithMessage({
-        contract: contract(),
-        func,
-        args: args(),
-        message: 'SwapperNotAllowlisted',
-      });
-    });
-  });
-}
 export function thenTakeFromMsgSenderIsCalledCorrectly(args: () => { contract: Extensions; calls: { token: string; amount: number }[] }) {
   then('_takeFromMsgSender is called correctly', async () => {
     const { contract, calls: expectedCalls } = args();
@@ -83,5 +57,15 @@ export function thenSendBalanceToRecipientIsNotCalled(contract: () => Extensions
   then('_sendBalanceToRecipient is not called', async () => {
     const calls = await contract().sendBalanceToRecipientCalls();
     expect(calls).to.have.lengthOf(0);
+  });
+}
+
+export function thenAllowlistWasCheckedForSwappers(args: () => { registry: FakeContract<ISwapperRegistry>; swappers: string[] }) {
+  then('allow list was checked correctly for swappers', async () => {
+    const { registry, swappers } = args();
+    expect(registry.isSwapperAllowlisted).to.have.callCount(swappers.length);
+    for (const swapper of swappers) {
+      expect(registry.isSwapperAllowlisted).to.have.been.calledWith(swapper);
+    }
   });
 }
