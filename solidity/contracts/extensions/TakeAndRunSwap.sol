@@ -4,7 +4,7 @@ pragma solidity >=0.8.7 <0.9.0;
 import '../SwapAdapter.sol';
 
 abstract contract TakeAndRunSwap is SwapAdapter {
-  // @notice The parameters to execute take & run a swap
+  /// @notice The parameters to execute the call
   struct TakeAndRunSwapParams {
     // The swapper that will execute the call
     address swapper;
