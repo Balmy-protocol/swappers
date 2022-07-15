@@ -41,7 +41,7 @@ export function thenTakeFromMsgSenderIsCalledCorrectly(args: () => { contract: E
   });
 }
 export function thenMaxApproveSpenderIsCalledCorrectly(
-  args: () => { contract: Extensions; calls: { token: string; spender: string; minAllowance: number }[] }
+  args: () => { contract: Extensions; calls: { token: string; spender: string; alreadyValidatedSpender: boolean; minAllowance: number }[] }
 ) {
   then('_maxApproveSpenderIfNeeded is called correctly', async () => {
     const { contract, calls: expectedCalls } = args();
@@ -49,6 +49,7 @@ export function thenMaxApproveSpenderIsCalledCorrectly(
     for (let i = 0; i < calls.length; i++) {
       expect(calls[i].token).to.equal(expectedCalls[i].token);
       expect(calls[i].spender).to.equal(expectedCalls[i].spender);
+      expect(calls[i].alreadyValidatedSpender).to.equal(expectedCalls[i].alreadyValidatedSpender);
       expect(calls[i].minAllowance).to.equal(expectedCalls[i].minAllowance);
     }
   });

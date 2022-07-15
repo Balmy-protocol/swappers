@@ -13,9 +13,10 @@ contract SwapAdapterMock is SwapAdapter {
   function internalMaxApproveSpenderIfNeeded(
     IERC20 _token,
     address _spender,
+    bool _alreadyValidatedSpender,
     uint256 _minAllowance
   ) external {
-    _maxApproveSpenderIfNeeded(_token, _spender, _minAllowance);
+    _maxApproveSpenderIfNeeded(_token, _spender, _alreadyValidatedSpender, _minAllowance);
   }
 
   function internalExecuteSwap(address _swapper, bytes calldata _swapData) external payable {
