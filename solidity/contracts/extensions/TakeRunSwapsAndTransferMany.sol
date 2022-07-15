@@ -60,15 +60,15 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
     // Take from caller
     _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
 
+    // Validate that all swappers are allowlisted
+    for (uint256 i; i < _parameters.swappers.length; i++) {
+      _assertSwapperIsAllowlisted(_parameters.swappers[i]);
+    }
+
     // Approve whatever is necessary
     for (uint256 i; i < _parameters.allowanceTargets.length; i++) {
       Allowance memory _allowance = _parameters.allowanceTargets[i];
       _maxApproveSpenderIfNeeded(_allowance.token, _allowance.allowanceTarget, false, _allowance.minAllowance);
-    }
-
-    // Validate that all swappers are allowlisted
-    for (uint256 i; i < _parameters.swappers.length; i++) {
-      _assertSwapperIsAllowlisted(_parameters.swappers[i]);
     }
 
     // Execute swaps
