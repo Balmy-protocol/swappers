@@ -17,7 +17,7 @@ export function whenSwapperIsNotAllowlistedThenTxReverts({
 }) {
   when('swapper is not allowlisted', () => {
     given(() => {
-      registry().isAllowlisted.returns(false);
+      registry().isSwapperAllowlisted.returns(false);
     });
     then('reverts with message', async () => {
       await behaviours.txShouldRevertWithMessage({

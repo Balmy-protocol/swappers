@@ -44,7 +44,7 @@ contract('TakeAndRunSwap', () => {
     await snapshot.revert(snapshotId);
     token.transfer.returns(true);
     token.transferFrom.returns(true);
-    registry.isAllowlisted.returns(true);
+    registry.isSwapperAllowlisted.returns(true);
   });
 
   describe('takeAndRunSwap', () => {

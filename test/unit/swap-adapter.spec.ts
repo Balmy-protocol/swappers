@@ -42,7 +42,7 @@ describe('SwapAdapter', () => {
     token.transferFrom.reset();
     token.transfer.returns(true);
     token.transferFrom.returns(true);
-    registry.isAllowlisted.reset();
+    registry.isSwapperAllowlisted.reset();
   });
 
   describe('constructor', () => {
@@ -160,16 +160,16 @@ describe('SwapAdapter', () => {
   describe('_assertSwapperIsAllowlisted', () => {
     when('swapper is allowlisted', () => {
       given(async () => {
-        registry.isAllowlisted.returns(true);
+        registry.isSwapperAllowlisted.returns(true);
         await swapAdapter.internalAssertSwapperIsAllowlisted(ACCOUNT);
       });
       then('allowlist is checked correctly', () => {
-        expect(registry.isAllowlisted).to.have.been.calledOnceWith(ACCOUNT);
+        expect(registry.isSwapperAllowlisted).to.have.been.calledOnceWith(ACCOUNT);
       });
     });
     when('swapper is not allowlisted', () => {
       given(() => {
-        registry.isAllowlisted.returns(false);
+        registry.isSwapperAllowlisted.returns(false);
       });
       then('reverts with message', async () => {
         await behaviours.txShouldRevertWithMessage({
