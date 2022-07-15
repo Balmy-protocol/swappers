@@ -69,4 +69,12 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
     }
     emit RemoveSwappersFromAllowlist(_swappers);
   }
+
+  /// @inheritdoc ISwapperRegistry
+  function allowSupplementaryAllowanceTargets(address[] calldata _allowanceTargets) external onlyRole(ADMIN_ROLE) {
+    for (uint256 i; i < _allowanceTargets.length; i++) {
+      _accountRole[_allowanceTargets[i]] = Role.SUPPLEMENTARY_ALLOWANCE_TARGET;
+    }
+    emit AllowedSupplementaryAllowanceTargets(_allowanceTargets);
+  }
 }

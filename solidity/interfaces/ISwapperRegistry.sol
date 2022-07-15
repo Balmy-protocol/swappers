@@ -57,4 +57,11 @@ interface ISwapperRegistry {
    * @param swappers The list of swappers to remove
    */
   function removeSwappersFromAllowlist(address[] calldata swappers) external;
+
+  /**
+   * @notice Adds a list of supplementary allowance targets to the allowlist
+   * @dev Can only be called by users with the admin role
+   * @param allowanceTargets The list of allowance targets to add
+   */
+  function allowSupplementaryAllowanceTargets(address[] calldata allowanceTargets) external;
 }
