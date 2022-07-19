@@ -9,6 +9,12 @@ import './ISwapperRegistry.sol';
  *         take a swapper and a swap's data, and if the swapper is valid, it will execute the swap
  */
 interface ISwapAdapter {
+  /// @notice Describes how the allowance should be revoked for the given spender
+  struct RevokeAction {
+    address spender;
+    IERC20[] tokens;
+  }
+
   /// @notice Thrown when one of the parameters is a zero address
   error ZeroAddress();
 
@@ -18,10 +24,23 @@ interface ISwapAdapter {
    */
   error SwapperNotAllowlisted(address swapper);
 
+  /// @notice Thrown when the allowance target is not allowed by the swapper registry
+  error InvalidAllowanceTarget(address spender);
+
+  /// @notice Thrown when someone who is not the registry tries to remoke an allowance
+  error OnlyRegistryCanRevoke();
+
   /**
    * @notice Returns the address of the swapper registry
    * @dev Cannot be modified
    * @return The address of the swapper registry
    */
   function SWAPPER_REGISTRY() external view returns (ISwapperRegistry);
+
+  /**
+   * @notice Revokes ERC20 allowances for the given spenders
+   * @dev Can only be called by the registry
+   * @param revokeActions The spenders and tokens to revoke
+   */
+  function revokeAllowances(RevokeAction[] calldata revokeActions) external;
 }
