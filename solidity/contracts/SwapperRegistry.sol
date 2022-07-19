@@ -2,7 +2,6 @@
 pragma solidity >=0.8.7 <0.9.0;
 
 import '@openzeppelin/contracts/access/AccessControl.sol';
-import './SwapAdapter.sol';
 import '../interfaces/ISwapperRegistry.sol';
 
 contract SwapperRegistry is AccessControl, ISwapperRegistry {
@@ -87,11 +86,7 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
     emit RemovedAllowanceTargetsFromAllowlist(_allowanceTargets);
   }
 
-  struct RevokeAction {
-    SwapAdapter target;
-    SwapAdapter.RevokeAction[] revokeActions;
-  }
-
+  /// @inheritdoc ISwapperRegistry
   function revokeAllowances(RevokeAction[] calldata _revokeActions) external onlyRole(ADMIN_ROLE) {
     for (uint256 i; i < _revokeActions.length; i++) {
       _revokeActions[i].target.revokeAllowances(_revokeActions[i].revokeActions);

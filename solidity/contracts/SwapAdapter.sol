@@ -9,18 +9,6 @@ abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
   using Address for address;
 
-  /// @notice Describes how the allowance should be revoked for the given spender
-  struct RevokeAction {
-    address spender;
-    IERC20[] tokens;
-  }
-
-  /// @notice Thrown when the allowance target is not allowed by the swapper registry
-  error InvalidAllowanceTarget(address spender);
-
-  /// @notice Thrown when someone who is not the registry tries to remoke an allowance
-  error OnlyRegistryCanRevoke();
-
   ISwapperRegistry public immutable SWAPPER_REGISTRY;
 
   constructor(address _swapperRegistry) {
@@ -28,11 +16,7 @@ abstract contract SwapAdapter is ISwapAdapter {
     SWAPPER_REGISTRY = ISwapperRegistry(_swapperRegistry);
   }
 
-  /**
-   * @notice Revokes ERC20 allowances for the given spenders
-   * @dev Can only be called by the registry
-   * @param _revokeActions The spenders and tokens to revoke
-   */
+  /// @inheritdoc ISwapAdapter
   function revokeAllowances(RevokeAction[] calldata _revokeActions) external {
     if (msg.sender != address(SWAPPER_REGISTRY)) revert OnlyRegistryCanRevoke();
     for (uint256 i; i < _revokeActions.length; i++) {

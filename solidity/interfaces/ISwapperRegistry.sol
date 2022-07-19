@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
+import './ISwapAdapter.sol';
+
 /**
  * @notice This contract will act as a registry to allowlist swappers. Different contracts from the Mean
  *         ecosystem will ask this contract if an address is a valid swapper or not
@@ -8,6 +10,12 @@ pragma solidity >=0.8.7 <0.9.0;
  *         will also track those here
  */
 interface ISwapperRegistry {
+  /// @notice Describes how the allowance should be revoked for the given adapter
+  struct RevokeAction {
+    ISwapAdapter target;
+    ISwapAdapter.RevokeAction[] revokeActions;
+  }
+
   /// @notice Thrown when one of the parameters is a zero address
   error ZeroAddress();
 
@@ -77,4 +85,11 @@ interface ISwapperRegistry {
    * @param allowanceTargets The list of allowance targets to remove
    */
   function removeSupplementaryAllowanceTargetsFromAllowlist(address[] calldata allowanceTargets) external;
+
+  /**
+   * @notice Revokes ERC20 allowances for the given adapters
+   * @dev Can only be called by users with the admin role
+   * @param revokeActions The adapters and the revokes that they should execute
+   */
+  function revokeAllowances(RevokeAction[] calldata revokeActions) external;
 }
