@@ -66,13 +66,13 @@ describe('SwapAdapter', () => {
   });
 
   describe('revokeAllowances', () => {
-    when('current allowance is enough', () => {
+    when('function is called', () => {
       given(async () => {
         const registrySigner = await wallet.impersonate(registry.address);
         await wallet.setBalance({ account: registrySigner._address, balance: utils.parseEther('10') });
         await swapAdapter.connect(registrySigner).revokeAllowances([{ spender: ACCOUNT, tokens: [token.address] }]);
       });
-      then('allowance was called revoked', async () => {
+      then('allowance is revoked', async () => {
         expect(token.approve).to.have.been.calledOnceWith(ACCOUNT, 0);
       });
     });
