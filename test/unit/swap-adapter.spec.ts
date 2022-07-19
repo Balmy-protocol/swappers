@@ -1,12 +1,13 @@
 import chai, { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { constants } from 'ethers';
-import { behaviours } from '@utils';
+import { constants, utils } from 'ethers';
+import { behaviours, wallet } from '@utils';
 import { given, then, when } from '@utils/bdd';
 import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
 import { snapshot } from '@utils/evm';
 import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { JsonRpcSigner } from '@ethersproject/providers';
 
 chai.use(smock.matchers);
 
@@ -60,6 +61,29 @@ describe('SwapAdapter', () => {
     when('all arguments are valid', () => {
       then('registry is set correctly', async () => {
         expect(await swapAdapter.SWAPPER_REGISTRY()).to.equal(registry.address);
+      });
+    });
+  });
+
+  describe('revokeAllowances', () => {
+    when('current allowance is enough', () => {
+      given(async () => {
+        const registrySigner = await wallet.impersonate(registry.address);
+        await wallet.setBalance({ account: registrySigner._address, balance: utils.parseEther('10') });
+        await swapAdapter.connect(registrySigner).revokeAllowances([{ spender: ACCOUNT, tokens: [token.address] }]);
+      });
+      then('allowance was called revoked', async () => {
+        expect(token.approve).to.have.been.calledOnceWith(ACCOUNT, 0);
+      });
+    });
+    when('caller is not the signer', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapAdapter,
+          func: 'revokeAllowances',
+          args: [[]],
+          message: 'OnlyRegistryCanRevoke',
+        });
       });
     });
   });
