@@ -31,12 +31,12 @@ abstract contract SwapAdapter is ISwapAdapter {
   /**
    * @notice Revokes ERC20 allowances for the given spenders
    * @dev Can only be called by the registry
-   * @param _removeActions The spenders and tokens to revoke
+   * @param _revokeActions The spenders and tokens to revoke
    */
-  function revokeAllowances(RevokeAction[] calldata _removeActions) external {
+  function revokeAllowances(RevokeAction[] calldata _revokeActions) external {
     if (msg.sender != address(SWAPPER_REGISTRY)) revert OnlyRegistryCanRevoke();
-    for (uint256 i; i < _removeActions.length; i++) {
-      RevokeAction memory _action = _removeActions[i];
+    for (uint256 i; i < _revokeActions.length; i++) {
+      RevokeAction memory _action = _revokeActions[i];
       for (uint256 j; j < _action.tokens.length; j++) {
         _action.tokens[j].approve(_action.spender, 0);
       }
