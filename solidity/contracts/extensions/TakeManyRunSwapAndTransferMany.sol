@@ -9,8 +9,8 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
   struct TakeManyRunSwapAndTransferManyParams {
     // The tokens (and amounts) to take from the caller
     TakeFromCaller[] takeFromCaller;
-    // The accounts that should be approved for spending
-    Allowance[] allowanceTargets;
+    // The account that needs to be approved for token transfers
+    address allowanceTarget;
     // The swapper that will execute the call
     address swapper;
     // The actual swap execution
@@ -27,25 +27,22 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
    * @param _parameters The parameters for the swap
    */
   function takeManyRunSwapAndTransferMany(TakeManyRunSwapAndTransferManyParams calldata _parameters) external payable {
-    // Take from caller
     for (uint256 i; i < _parameters.takeFromCaller.length; i++) {
+      // Take from caller
       TakeFromCaller memory _takeFromCaller = _parameters.takeFromCaller[i];
       _takeFromMsgSender(_takeFromCaller.token, _takeFromCaller.amount);
+
+      // Approve whatever is necessary
+      _maxApproveSpenderIfNeeded(
+        _takeFromCaller.token,
+        _parameters.allowanceTarget,
+        _parameters.allowanceTarget == _parameters.swapper,
+        _takeFromCaller.amount
+      );
     }
 
     // Validate that the swapper is allowlisted
     _assertSwapperIsAllowlisted(_parameters.swapper);
-
-    // Approve whatever is necessary
-    for (uint256 i; i < _parameters.allowanceTargets.length; i++) {
-      Allowance memory _allowance = _parameters.allowanceTargets[i];
-      _maxApproveSpenderIfNeeded(
-        _allowance.token,
-        _allowance.allowanceTarget,
-        _allowance.allowanceTarget == _parameters.swapper,
-        _allowance.minAllowance
-      );
-    }
 
     // Execute swap
     _executeSwap(_parameters.swapper, _parameters.swapData);

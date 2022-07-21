@@ -56,17 +56,14 @@ contract('TakeManyRunSwapAndTransferMany', () => {
   });
 
   describe('takeManyRunSwapAndTransferMany', () => {
-    when('function is called', () => {
+    when('function is called and allowance target is the same as swapper', () => {
       given(async () => {
         await extensions.takeManyRunSwapAndTransferMany({
           takeFromCaller: [
             { token: tokenIn1.address, amount: AMOUNT },
             { token: tokenIn2.address, amount: AMOUNT / 2 },
           ],
-          allowanceTargets: [
-            { allowanceTarget: ACCOUNT, minAllowance: AMOUNT, token: tokenIn1.address },
-            { allowanceTarget: swapper.address, minAllowance: 0, token: tokenIn2.address },
-          ],
+          allowanceTarget: swapper.address,
           swapper: swapper.address,
           swapData,
           transferOutBalance: [
@@ -86,8 +83,8 @@ contract('TakeManyRunSwapAndTransferMany', () => {
       thenMaxApproveSpenderIsCalledCorrectly(() => ({
         contract: extensions,
         calls: [
-          { token: tokenIn1.address, spender: ACCOUNT, alreadyValidatedSpender: false, minAllowance: AMOUNT },
-          { token: tokenIn2.address, spender: swapper.address, alreadyValidatedSpender: true, minAllowance: 0 },
+          { token: tokenIn1.address, spender: swapper.address, alreadyValidatedSpender: true, minAllowance: AMOUNT },
+          { token: tokenIn2.address, spender: swapper.address, alreadyValidatedSpender: true, minAllowance: AMOUNT / 2 },
         ],
       }));
       thenAllowlistWasCheckedForSwappers(() => ({
@@ -107,5 +104,30 @@ contract('TakeManyRunSwapAndTransferMany', () => {
         ],
       }));
     });
+  });
+  when('function is called and allowance target is different from the swapper', () => {
+    given(async () => {
+      await extensions.takeManyRunSwapAndTransferMany({
+        takeFromCaller: [
+          { token: tokenIn1.address, amount: AMOUNT },
+          { token: tokenIn2.address, amount: AMOUNT / 2 },
+        ],
+        allowanceTarget: ACCOUNT,
+        swapper: swapper.address,
+        swapData,
+        transferOutBalance: [
+          { token: tokenIn2.address, recipient: ACCOUNT },
+          { token: tokenOut1.address, recipient: ACCOUNT },
+          { token: tokenOut2.address, recipient: ACCOUNT },
+        ],
+      });
+    });
+    thenMaxApproveSpenderIsCalledCorrectly(() => ({
+      contract: extensions,
+      calls: [
+        { token: tokenIn1.address, spender: ACCOUNT, alreadyValidatedSpender: false, minAllowance: AMOUNT },
+        { token: tokenIn2.address, spender: ACCOUNT, alreadyValidatedSpender: false, minAllowance: AMOUNT / 2 },
+      ],
+    }));
   });
 });
