@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
+import './Shared.sol';
 import '../SwapAdapter.sol';
 
 abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
@@ -20,32 +21,6 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
     uint8[] swapperForSwap;
     // Tokens to transfer after swaps have been executed
     TransferOutBalance[] transferOutBalance;
-  }
-
-  /// @notice An allowance to provide for the swaps to work
-  struct Allowance {
-    // The token that should be approved
-    IERC20 token;
-    // The spender
-    address allowanceTarget;
-    // The minimum allowance needed
-    uint256 minAllowance;
-  }
-
-  /// @notice A swap to execute
-  struct Swap {
-    // The index of the swapper in the list of swappers
-    uint8 swapperIndex;
-    // The data to send to the swapper
-    bytes swapData;
-  }
-
-  /// @notice A token that was left on the contract and should be transferred out
-  struct TransferOutBalance {
-    // The token to transfer
-    IERC20 token;
-    // The recipient of those tokens
-    address recipient;
   }
 
   /**
