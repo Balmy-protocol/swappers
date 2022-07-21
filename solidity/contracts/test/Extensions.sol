@@ -4,9 +4,16 @@ pragma solidity >=0.8.7 <0.9.0;
 import '../extensions/TakeAndRunSwap.sol';
 import '../extensions/TakeRunSwapAndTransfer.sol';
 import '../extensions/TakeRunSwapsAndTransferMany.sol';
+import '../extensions/TakeManyRunSwapAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
 
-contract Extensions is TakeAndRunSwap, TakeRunSwapAndTransfer, TakeRunSwapsAndTransferMany, TakeManyRunSwapsAndTransferMany {
+contract Extensions is
+  TakeAndRunSwap,
+  TakeRunSwapAndTransfer,
+  TakeRunSwapsAndTransferMany,
+  TakeManyRunSwapAndTransferMany,
+  TakeManyRunSwapsAndTransferMany
+{
   struct TakeFromMsgSenderCall {
     IERC20 token;
     uint256 amount;
