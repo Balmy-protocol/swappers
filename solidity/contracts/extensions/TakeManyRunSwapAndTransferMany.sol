@@ -45,7 +45,7 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
     _assertSwapperIsAllowlisted(_parameters.swapper);
 
     // Execute swap
-    _executeSwap(_parameters.swapper, _parameters.swapData);
+    _executeSwap(_parameters.swapper, _parameters.swapData, msg.value);
 
     // Transfer out whatever was left in the contract
     for (uint256 i; i < _parameters.transferOutBalance.length; i++) {

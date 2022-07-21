@@ -90,8 +90,8 @@ contract('TakeRunSwapsAndTransferMany', () => {
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
         calls: [
-          { swapper: swapper1.address, swapData },
-          { swapper: swapper2.address, swapData },
+          { swapper: swapper1.address, swapData, value: 0 },
+          { swapper: swapper2.address, swapData, value: 0 },
         ],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({

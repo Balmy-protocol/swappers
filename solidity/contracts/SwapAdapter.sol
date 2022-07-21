@@ -66,8 +66,12 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @param _swapper The actual swapper
    * @param _swapData The swap execution data
    */
-  function _executeSwap(address _swapper, bytes calldata _swapData) internal virtual {
-    _swapper.functionCallWithValue(_swapData, msg.value);
+  function _executeSwap(
+    address _swapper,
+    bytes calldata _swapData,
+    uint256 _value
+  ) internal virtual {
+    _swapper.functionCallWithValue(_swapData, _value);
   }
 
   /**

@@ -2,6 +2,7 @@ import { FakeContract } from '@defi-wonderland/smock';
 import { Extensions, ISwapperRegistry } from '@typechained';
 import { then } from '@utils/bdd';
 import { expect } from 'chai';
+import { BigNumberish } from 'ethers';
 
 export function thenTakeFromMsgSenderIsCalledCorrectly(args: () => { contract: Extensions; calls: { token: string; amount: number }[] }) {
   then('_takeFromMsgSender is called correctly', async () => {
@@ -29,13 +30,16 @@ export function thenMaxApproveSpenderIsCalledCorrectly(
   });
 }
 
-export function thenExecuteSwapIsCalledCorrectly(args: () => { contract: Extensions; calls: { swapper: string; swapData: string }[] }) {
+export function thenExecuteSwapIsCalledCorrectly(
+  args: () => { contract: Extensions; calls: { swapper: string; swapData: string; value: BigNumberish }[] }
+) {
   then('_executeSwap is called correctly', async () => {
     const { contract, calls: expectedCalls } = args();
     const calls = await contract.executeSwapCalls();
     for (let i = 0; i < calls.length; i++) {
       expect(calls[i].swapper).to.equal(expectedCalls[i].swapper);
       expect(calls[i].swapData).to.equal(expectedCalls[i].swapData);
+      expect(calls[i].value).to.equal(expectedCalls[i].value);
     }
   });
 }
