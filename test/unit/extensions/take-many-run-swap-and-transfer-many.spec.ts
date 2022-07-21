@@ -104,7 +104,7 @@ contract('TakeManyRunSwapAndTransferMany', () => {
         ],
       }));
     });
-    when('function is with value', () => {
+    when('function is called with value', () => {
       given(async () => {
         await extensions.takeManyRunSwapAndTransferMany(
           {
