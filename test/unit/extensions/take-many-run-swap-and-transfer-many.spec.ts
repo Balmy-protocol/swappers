@@ -112,10 +112,7 @@ contract('TakeManyRunSwapAndTransferMany', () => {
               { token: tokenIn1.address, amount: AMOUNT },
               { token: tokenIn2.address, amount: AMOUNT / 2 },
             ],
-            allowanceTargets: [
-              { allowanceTarget: ACCOUNT, minAllowance: AMOUNT, token: tokenIn1.address },
-              { allowanceTarget: swapper.address, minAllowance: 0, token: tokenIn2.address },
-            ],
+            allowanceTarget: ACCOUNT,
             swapper: swapper.address,
             swapData,
             transferOutBalance: [
