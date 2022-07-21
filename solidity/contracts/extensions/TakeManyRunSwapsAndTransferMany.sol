@@ -15,8 +15,8 @@ abstract contract TakeManyRunSwapsAndTransferMany is SwapAdapter {
     address[] swappers;
     // The different swapps to execute
     bytes[] swaps;
-    // The index of the swapper that should execute each swap. This might look strange but it's way cheaper than alternatives
-    uint8[] swapperForSwap;
+    // Context necessary for the swap execution
+    SwapContext[] swapContext;
     // Tokens to transfer after swaps have been executed
     TransferOutBalance[] transferOutBalance;
   }
@@ -49,7 +49,8 @@ abstract contract TakeManyRunSwapsAndTransferMany is SwapAdapter {
 
     // Execute swaps
     for (uint256 i; i < _parameters.swaps.length; i++) {
-      _executeSwap(_parameters.swappers[_parameters.swapperForSwap[i]], _parameters.swaps[i], 0);
+      SwapContext memory _context = _parameters.swapContext[i];
+      _executeSwap(_parameters.swappers[_context.swapperIndex], _parameters.swaps[i], _context.value);
     }
 
     // Transfer out whatever was left in the contract
