@@ -99,15 +99,15 @@ contract('SwapProxy', () => {
         minAmountOutWETHToUSDC = quoteWETHToUSDC.minAmountOut;
         minAmountOutUSDCToETH = quoteUSDCToETH.minAmountOut;
       });
-      then(`caller has no 'USDC' left`, () => expectBalanceToBeEmpty(USDC, caller));
-      then(`caller has no 'WETH' left`, () => expectBalanceToBeEmpty(WETH, caller));
-      then(`proxy has no 'USDC' left`, () => expectBalanceToBeEmpty(USDC, swapProxy));
-      then(`proxy has no 'WETH' left`, () => expectBalanceToBeEmpty(WETH, swapProxy));
-      then(`proxy has no 'ETH' left`, () => expectETHBalanceToBeEmpty(swapProxy));
-      then(`recipient has the expected amount of 'USDC'`, () =>
+      then('caller has no USDC left', () => expectBalanceToBeEmpty(USDC, caller));
+      then('caller has no WETH left', () => expectBalanceToBeEmpty(WETH, caller));
+      then('proxy has no USDC left', () => expectBalanceToBeEmpty(USDC, swapProxy));
+      then('proxy has no WETH left', () => expectBalanceToBeEmpty(WETH, swapProxy));
+      then('proxy has no ETH left', () => expectETHBalanceToBeEmpty(swapProxy));
+      then('recipient has the expected amount of USDC', () =>
         expectBalanceToBeGreatherThan(USDC, minAmountOutETHToUSDC.add(minAmountOutWETHToUSDC), recipient)
       );
-      then(`recipient has the expected amount of 'ETH'`, () =>
+      then('recipient has the expected amount of ETH', () =>
         expectETHBalanceToBeGreatherThan(initialRecipientEthBalance.add(minAmountOutUSDCToETH), recipient)
       );
     });
