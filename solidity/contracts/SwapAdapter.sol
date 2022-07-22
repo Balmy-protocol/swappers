@@ -29,6 +29,8 @@ abstract contract SwapAdapter is ISwapAdapter {
     }
   }
 
+  receive() external payable {}
+
   /**
    * @notice Takes the given amount of tokens from the caller
    * @param _token The token to check
