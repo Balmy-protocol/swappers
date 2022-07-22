@@ -7,7 +7,6 @@ import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Sw
 import { snapshot } from '@utils/evm';
 import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { JsonRpcSigner } from '@ethersproject/providers';
 
 chai.use(smock.matchers);
 

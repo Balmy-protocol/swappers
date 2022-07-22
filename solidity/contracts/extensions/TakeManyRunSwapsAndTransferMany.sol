@@ -4,13 +4,11 @@ pragma solidity >=0.8.7 <0.9.0;
 import './Shared.sol';
 import '../SwapAdapter.sol';
 
-abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
+abstract contract TakeManyRunSwapsAndTransferMany is SwapAdapter {
   /// @notice The parameters to execute the call
-  struct TakeRunSwapsAndTransferManyParams {
-    // The token that will be taken from the caller
-    IERC20 tokenIn;
-    // The max amount of "token in" that can be spent
-    uint256 maxAmountIn;
+  struct TakeManyRunSwapsAndTransferManyParams {
+    // The tokens (and amounts) to take from the caller
+    TakeFromCaller[] takeFromCaller;
     // The accounts that should be approved for spending
     Allowance[] allowanceTargets;
     // The different swappers involved in the swap
@@ -24,16 +22,19 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
   }
 
   /**
-   * @notice Takes tokens from the caller, and executes many different swaps. These swaps can be chained between
+   * @notice Takes many tokens from the caller, and executes many different swaps. These swaps can be chained between
    *         each other, or totally independent. After the swaps are executed, the caller can specify that tokens
    *         that remained in the contract should be sent to different recipients. These tokens could be either
    *         the result of the swaps, or unspent tokens
    * @dev This function can only be executed with swappers that are allowlisted
    * @param _parameters The parameters for the swap
    */
-  function takeRunSwapsAndTransferMany(TakeRunSwapsAndTransferManyParams calldata _parameters) external payable {
+  function takeManyRunSwapsAndTransferMany(TakeManyRunSwapsAndTransferManyParams calldata _parameters) external payable {
     // Take from caller
-    _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+    for (uint256 i; i < _parameters.takeFromCaller.length; i++) {
+      TakeFromCaller memory _takeFromCaller = _parameters.takeFromCaller[i];
+      _takeFromMsgSender(_takeFromCaller.token, _takeFromCaller.amount);
+    }
 
     // Validate that all swappers are allowlisted
     for (uint256 i; i < _parameters.swappers.length; i++) {
