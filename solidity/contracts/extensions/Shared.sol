@@ -34,7 +34,7 @@ struct Swap {
 /// @notice A token that was left on the contract and should be transferred out
 struct TransferOutBalance {
   // The token to transfer
-  IERC20 token;
+  address token;
   // The recipient of those tokens
   address recipient;
 }

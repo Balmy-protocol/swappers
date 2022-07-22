@@ -14,7 +14,7 @@ abstract contract TakeAndRunSwap is SwapAdapter {
     // The actual swap execution
     bytes swapData;
     // The token that will be swapped
-    IERC20 tokenIn;
+    address tokenIn;
     // The max amount of "token in" that can be spent
     uint256 maxAmountIn;
     // Determine if we need to check if there are any unspent "token in" to return to the caller
@@ -28,10 +28,10 @@ abstract contract TakeAndRunSwap is SwapAdapter {
    * @param _parameters The parameters for the swap
    */
   function takeAndRunSwap(TakeAndRunSwapParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
-    if (address(_parameters.tokenIn) != PROTOCOL_TOKEN) {
-      _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+    if (_parameters.tokenIn != PROTOCOL_TOKEN) {
+      _takeFromMsgSender(IERC20(_parameters.tokenIn), _parameters.maxAmountIn);
       _maxApproveSpenderIfNeeded(
-        _parameters.tokenIn,
+        IERC20(_parameters.tokenIn),
         _parameters.allowanceTarget,
         _parameters.swapper == _parameters.allowanceTarget, // If target is a swapper, then it's ok as allowance target
         _parameters.maxAmountIn

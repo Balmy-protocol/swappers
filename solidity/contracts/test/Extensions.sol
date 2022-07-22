@@ -33,7 +33,7 @@ contract Extensions is
   }
 
   struct SendBalanceToRecipientCall {
-    IERC20 token;
+    address token;
     address recipient;
   }
 
@@ -84,7 +84,7 @@ contract Extensions is
     super._executeSwap(_swapper, _swapData, _value);
   }
 
-  function _sendBalanceToRecipient(IERC20 _token, address _recipient) internal override {
+  function _sendBalanceToRecipient(address _token, address _recipient) internal override {
     _sendBalanceToRecipientCalls.push(SendBalanceToRecipientCall(_token, _recipient));
     super._sendBalanceToRecipient(_token, _recipient);
   }

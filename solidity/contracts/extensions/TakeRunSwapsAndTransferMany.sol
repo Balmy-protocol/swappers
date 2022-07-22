@@ -8,7 +8,7 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
   /// @notice The parameters to execute the call
   struct TakeRunSwapsAndTransferManyParams {
     // The token that will be taken from the caller
-    IERC20 tokenIn;
+    address tokenIn;
     // The max amount of "token in" that can be spent
     uint256 maxAmountIn;
     // The accounts that should be approved for spending
@@ -32,9 +32,9 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
    * @param _parameters The parameters for the swap
    */
   function takeRunSwapsAndTransferMany(TakeRunSwapsAndTransferManyParams calldata _parameters) external payable {
-    if (address(_parameters.tokenIn) != PROTOCOL_TOKEN) {
+    if (_parameters.tokenIn != PROTOCOL_TOKEN) {
       // Take from caller
-      _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+      _takeFromMsgSender(IERC20(_parameters.tokenIn), _parameters.maxAmountIn);
     }
 
     // Validate that all swappers are allowlisted
