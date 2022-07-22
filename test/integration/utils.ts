@@ -14,6 +14,7 @@ const CHAIN = { chain: 'ethereum', chainId: 1 };
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const WETH_WHALE_ADDRESS = '0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e';
 const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+const USDC_WHALE_ADDRESS = '0x0a59649758aa4d66e25f08dd01271e891fe52199';
 
 export async function getQuoteAndAllowlistSwapper({
   swapProxy,
@@ -29,7 +30,7 @@ export async function getQuoteAndAllowlistSwapper({
   swapProxy: SwapProxy;
   registry: SwapperRegistry;
   tokenIn: IERC20 | 'ETH';
-  tokenOut: IERC20;
+  tokenOut: IERC20 | 'ETH';
   slippagePercentage?: number;
   amount: BigNumberish;
   trade: 'sell' | 'buy';
@@ -39,7 +40,7 @@ export async function getQuoteAndAllowlistSwapper({
   const slippage = slippagePercentage ?? 0.3;
   const quote = await quoter({
     tokenIn: tokenIn == 'ETH' ? ETH_ADDRESS : tokenIn.address,
-    tokenOut: tokenOut.address,
+    tokenOut: tokenOut == 'ETH' ? ETH_ADDRESS : tokenOut.address,
     chainId: 1,
     slippagePercentage: slippage,
     amount,
@@ -77,7 +78,9 @@ export async function deployContractsAndReturnSigners() {
 
   const wethWhale = await wallet.impersonate(WETH_WHALE_ADDRESS);
   await wallet.setBalance({ account: WETH_WHALE_ADDRESS, balance: BigNumber.from('0xffffffffffffffff') });
-  return { registry, swapProxy, WETH, USDC, wethWhale };
+  const usdcWhale = await wallet.impersonate(USDC_WHALE_ADDRESS);
+  await wallet.setBalance({ account: USDC_WHALE_ADDRESS, balance: BigNumber.from('0xffffffffffffffff') });
+  return { registry, swapProxy, WETH, USDC, wethWhale, usdcWhale };
 }
 
 const DETERMINISTIC_FACTORY_ADMIN = '0x1a00e1e311009e56e3b0b9ed6f86f5ce128a1c01';
