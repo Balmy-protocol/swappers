@@ -5,6 +5,8 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 import '../interfaces/ISwapAdapter.sol';
 
+address constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
 abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
   using Address for address;
@@ -81,9 +83,16 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @param _recipient The recipient of the token balance
    */
   function _sendBalanceToRecipient(address _token, address _recipient) internal virtual {
-    uint256 _balance = IERC20(_token).balanceOf(address(this));
-    if (_balance > 0) {
-      IERC20(_token).safeTransfer(_recipient, _balance);
+    if (_token == PROTOCOL_TOKEN) {
+      uint256 _balance = address(this).balance;
+      if (_balance > 0) {
+        payable(_recipient).transfer(_balance);
+      }
+    } else {
+      uint256 _balance = IERC20(_token).balanceOf(address(this));
+      if (_balance > 0) {
+        IERC20(_token).safeTransfer(_recipient, _balance);
+      }
     }
   }
 

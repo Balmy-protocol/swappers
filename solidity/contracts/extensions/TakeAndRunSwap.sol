@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
-import './Shared.sol';
 import '../SwapAdapter.sol';
 
 abstract contract TakeAndRunSwap is SwapAdapter {

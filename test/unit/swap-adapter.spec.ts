@@ -1,6 +1,6 @@
 import chai, { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { constants, utils } from 'ethers';
+import { BigNumber, constants, utils, Wallet } from 'ethers';
 import { behaviours, wallet } from '@utils';
 import { given, then, when } from '@utils/bdd';
 import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
@@ -205,28 +205,54 @@ describe('SwapAdapter', () => {
   });
 
   describe('_sendBalanceToRecipient', () => {
-    when('there is no balance', () => {
-      given(async () => {
-        token.balanceOf.returns(0);
-        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+    describe('ERC20', () => {
+      when('there is no balance', () => {
+        given(async () => {
+          token.balanceOf.returns(0);
+          await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+        });
+        then('balance is checked correctly', () => {
+          expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+        });
+        then('transfer is not executed', async () => {
+          expect(token.transfer).to.not.have.been.called;
+        });
       });
-      then('balance is checked correctly', () => {
-        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
-      });
-      then('transfer is not executed', async () => {
-        expect(token.transfer).to.not.have.been.called;
+      when('there is some balance', () => {
+        given(async () => {
+          token.balanceOf.returns(AMOUNT);
+          await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+        });
+        then('balance is checked correctly', () => {
+          expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+        });
+        then('transfer is executed', async () => {
+          expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, AMOUNT);
+        });
       });
     });
-    when('there is some balance', () => {
-      given(async () => {
-        token.balanceOf.returns(AMOUNT);
-        await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+    describe('Protocol token', () => {
+      const RECIPIENT = Wallet.createRandom();
+      when('there is no balance', () => {
+        given(async () => {
+          await swapAdapter.internalSendBalanceToRecipient(token.address, RECIPIENT.address);
+        });
+        then('nothing is sent', async () => {
+          expect(await ethers.provider.getBalance(RECIPIENT.address)).to.equal(0);
+        });
       });
-      then('balance is checked correctly', () => {
-        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
-      });
-      then('transfer is executed', async () => {
-        expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, AMOUNT);
+      when('there is some balance', () => {
+        const BALANCE = BigNumber.from(12345);
+        given(async () => {
+          await wallet.setBalance({ account: swapAdapter.address, balance: BALANCE });
+          await swapAdapter.internalSendBalanceToRecipient('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', RECIPIENT.address);
+        });
+        then('adapter no longer has balance', async () => {
+          expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(0);
+        });
+        then('balance is transferred to recipient', async () => {
+          expect(await ethers.provider.getBalance(RECIPIENT.address)).to.equal(BALANCE);
+        });
       });
     });
   });
