@@ -122,5 +122,43 @@ contract('TakeRunSwapAndTransfer', () => {
         ],
       }));
     });
+
+    when('token is is protocol token', () => {
+      given(async () => {
+        await extensions.takeRunSwapAndTransfer(
+          {
+            swapper: swapper.address,
+            allowanceTarget: swapper.address,
+            swapData: swapData,
+            tokenIn: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            maxAmountIn: AMOUNT,
+            checkUnspentTokensIn: false,
+            tokenOut: tokenOut.address,
+            recipient: ACCOUNT,
+          },
+          { value: 123456 }
+        );
+      });
+      thenAllowlistWasCheckedForSwappers(() => ({
+        registry,
+        swappers: [swapper.address],
+      }));
+      thenTakeFromMsgSenderIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [],
+      }));
+      thenMaxApproveSpenderIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [],
+      }));
+      thenExecuteSwapIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [{ swapper: swapper.address, swapData, value: 123456 }],
+      }));
+      thenSendBalanceToRecipientIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [{ token: tokenOut.address, recipient: ACCOUNT }],
+      }));
+    });
   });
 });

@@ -32,8 +32,10 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
    * @param _parameters The parameters for the swap
    */
   function takeRunSwapsAndTransferMany(TakeRunSwapsAndTransferManyParams calldata _parameters) external payable {
-    // Take from caller
-    _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+    if (address(_parameters.tokenIn) != PROTOCOL_TOKEN) {
+      // Take from caller
+      _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+    }
 
     // Validate that all swappers are allowlisted
     for (uint256 i; i < _parameters.swappers.length; i++) {

@@ -108,5 +108,53 @@ contract('TakeRunSwapsAndTransferMany', () => {
         ],
       }));
     });
+    when('token is is protocol token', () => {
+      given(async () => {
+        await extensions.takeRunSwapsAndTransferMany(
+          {
+            tokenIn: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            maxAmountIn: AMOUNT,
+            allowanceTargets: [],
+            swappers: [swapper1.address, swapper2.address],
+            swaps: [swapData, swapData],
+            swapContext: [
+              { value: 150000, swapperIndex: 0 },
+              { value: 50000, swapperIndex: 1 },
+            ],
+            transferOutBalance: [
+              { token: tokenOut1.address, recipient: ACCOUNT },
+              { token: tokenOut2.address, recipient: ACCOUNT },
+            ],
+          },
+          { value: 200000 }
+        );
+      });
+      thenTakeFromMsgSenderIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [],
+      }));
+      thenMaxApproveSpenderIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [],
+      }));
+      thenAllowlistWasCheckedForSwappers(() => ({
+        registry,
+        swappers: [swapper1.address, swapper2.address],
+      }));
+      thenExecuteSwapIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [
+          { swapper: swapper1.address, swapData, value: 150000 },
+          { swapper: swapper2.address, swapData, value: 50000 },
+        ],
+      }));
+      thenSendBalanceToRecipientIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [
+          { token: tokenOut1.address, recipient: ACCOUNT },
+          { token: tokenOut2.address, recipient: ACCOUNT },
+        ],
+      }));
+    });
   });
 });
