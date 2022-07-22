@@ -3,6 +3,8 @@ pragma solidity >=0.8.7 <0.9.0;
 
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
+address constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+
 /// @notice An amount to take form the caller
 struct TakeFromCaller {
   // The token that will be taken from the caller

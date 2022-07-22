@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
+import './Shared.sol';
 import '../SwapAdapter.sol';
 
 abstract contract TakeRunSwapAndTransfer is SwapAdapter {
@@ -31,13 +32,15 @@ abstract contract TakeRunSwapAndTransfer is SwapAdapter {
    * @param _parameters The parameters for the swap
    */
   function takeRunSwapAndTransfer(TakeRunSwapAndTransferParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
-    _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
-    _maxApproveSpenderIfNeeded(
-      _parameters.tokenIn,
-      _parameters.allowanceTarget,
-      _parameters.swapper == _parameters.allowanceTarget, // If target is a swapper, then it's ok as allowance target
-      _parameters.maxAmountIn
-    );
+    if (address(_parameters.tokenIn) != PROTOCOL_TOKEN) {
+      _takeFromMsgSender(_parameters.tokenIn, _parameters.maxAmountIn);
+      _maxApproveSpenderIfNeeded(
+        _parameters.tokenIn,
+        _parameters.allowanceTarget,
+        _parameters.swapper == _parameters.allowanceTarget, // If target is a swapper, then it's ok as allowance target
+        _parameters.maxAmountIn
+      );
+    }
     _executeSwap(_parameters.swapper, _parameters.swapData, msg.value);
     if (_parameters.checkUnspentTokensIn) {
       _sendBalanceToRecipient(_parameters.tokenIn, msg.sender);
