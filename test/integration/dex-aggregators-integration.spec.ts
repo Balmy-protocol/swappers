@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { getNodeUrl } from 'utils/env';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcSigner } from '@ethersproject/providers';
-import { IERC20, SwapProxy } from '@typechained';
+import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
 import { BigNumber, BigNumberish, constants, utils } from 'ethers';
 import { abi as IERC20_ABI } from '@openzeppelin/contracts/build/contracts/IERC20.json';
 import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finance/deterministic-factory/typechained';
@@ -24,7 +24,8 @@ const SLIPPAGE_PERCENTAGE = 0.3;
 const AMOUNT_EXACT_IN = utils.parseEther('1');
 const AMOUNT_EXACT_OUT = utils.parseUnits('1000', 6);
 
-describe('Comprehensive Swap Test', () => {
+describe('DEX Aggregators - Integration', () => {
+  let swapperRegistry: SwapperRegistry;
   let swapProxy: SwapProxy;
   let WETH: IERC20, USDC: IERC20;
   let admin: JsonRpcSigner, wethWhale: JsonRpcSigner;
@@ -45,6 +46,7 @@ describe('Comprehensive Swap Test', () => {
     await fork({ ...CHAIN, deployer });
     await deployments.fixture(['SwapProxy'], { keepExistingDeployments: true });
 
+    swapperRegistry = await ethers.getContract<SwapperRegistry>('SwapperRegistry');
     swapProxy = await ethers.getContract<SwapProxy>('SwapProxy');
     WETH = await ethers.getContractAt(IERC20_ABI, WETH_ADDRESS);
     USDC = await ethers.getContractAt(IERC20_ABI, USDC_ADDRESS);
@@ -207,10 +209,13 @@ describe('Comprehensive Swap Test', () => {
           minAmountOut = amountOut;
         }
 
-        await swapProxy.connect(admin).allowSwappers([quote.swapperAddress]);
+        await swapperRegistry.connect(admin).allowSwappers([quote.swapperAddress]);
+        if (quote.allowanceTarget !== quote.swapperAddress) {
+          await swapperRegistry.connect(admin).allowSupplementaryAllowanceTargets([quote.allowanceTarget]);
+        }
         await WETH.connect(wethWhale).transfer(caller.address, maxAmountIn);
         await WETH.connect(caller).approve(swapProxy.address, maxAmountIn);
-        await swapProxy.connect(caller).swapAndTransfer({
+        await swapProxy.connect(caller).takeRunSwapAndTransfer({
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
