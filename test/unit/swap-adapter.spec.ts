@@ -7,6 +7,7 @@ import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Sw
 import { snapshot } from '@utils/evm';
 import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+import { TransactionResponse } from '@ethersproject/abstract-provider';
 
 chai.use(smock.matchers);
 
@@ -182,13 +183,23 @@ describe('SwapAdapter', () => {
     when('executing a swap', () => {
       given(async () => {
         const { data } = await swapper.populateTransaction.executeSwap(ACCOUNT, ACCOUNT, AMOUNT);
-        await swapAdapter.internalExecuteSwap(swapper.address, data!, { value: VALUE });
+        await swapAdapter.internalExecuteSwap(swapper.address, data!, VALUE, { value: VALUE });
       });
       then('swapper is called correctly', () => {
         expect(swapper.executeSwap).to.have.been.calledOnceWith(ACCOUNT, ACCOUNT, AMOUNT);
       });
       then('swapper was sent the ether correctly', async () => {
         expect(await swapper.msgValue()).to.equal(VALUE);
+      });
+    });
+    when('sending less value than specified', () => {
+      let tx: Promise<TransactionResponse>;
+      given(async () => {
+        const { data } = await swapper.populateTransaction.executeSwap(ACCOUNT, ACCOUNT, AMOUNT);
+        tx = swapAdapter.internalExecuteSwap(swapper.address, data!, VALUE, { value: VALUE - 1 });
+      });
+      then('tx reverts', async () => {
+        await expect(tx).to.have.reverted;
       });
     });
   });

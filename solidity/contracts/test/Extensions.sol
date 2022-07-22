@@ -29,6 +29,7 @@ contract Extensions is
   struct ExecuteSwapCall {
     address swapper;
     bytes swapData;
+    uint256 value;
   }
 
   struct SendBalanceToRecipientCall {
@@ -74,9 +75,13 @@ contract Extensions is
     super._maxApproveSpenderIfNeeded(_token, _spender, _alreadyValidatedSpender, _minAllowance);
   }
 
-  function _executeSwap(address _swapper, bytes calldata _swapData) internal override {
-    _executeSwapCalls.push(ExecuteSwapCall(_swapper, _swapData));
-    super._executeSwap(_swapper, _swapData);
+  function _executeSwap(
+    address _swapper,
+    bytes calldata _swapData,
+    uint256 _value
+  ) internal override {
+    _executeSwapCalls.push(ExecuteSwapCall(_swapper, _swapData, _value));
+    super._executeSwap(_swapper, _swapData, _value);
   }
 
   function _sendBalanceToRecipient(IERC20 _token, address _recipient) internal override {

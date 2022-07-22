@@ -93,7 +93,7 @@ contract('TakeManyRunSwapAndTransferMany', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData }],
+        calls: [{ swapper: swapper.address, swapData, value: 0 }],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
         contract: extensions,
@@ -102,6 +102,31 @@ contract('TakeManyRunSwapAndTransferMany', () => {
           { token: tokenOut1.address, recipient: ACCOUNT },
           { token: tokenOut2.address, recipient: ACCOUNT },
         ],
+      }));
+    });
+    when('function is called with value', () => {
+      given(async () => {
+        await extensions.takeManyRunSwapAndTransferMany(
+          {
+            takeFromCaller: [
+              { token: tokenIn1.address, amount: AMOUNT },
+              { token: tokenIn2.address, amount: AMOUNT / 2 },
+            ],
+            allowanceTarget: ACCOUNT,
+            swapper: swapper.address,
+            swapData,
+            transferOutBalance: [
+              { token: tokenIn2.address, recipient: ACCOUNT },
+              { token: tokenOut1.address, recipient: ACCOUNT },
+              { token: tokenOut2.address, recipient: ACCOUNT },
+            ],
+          },
+          { value: 12345 }
+        );
+      });
+      thenExecuteSwapIsCalledCorrectly(() => ({
+        contract: extensions,
+        calls: [{ swapper: swapper.address, swapData, value: 12345 }],
       }));
     });
   });

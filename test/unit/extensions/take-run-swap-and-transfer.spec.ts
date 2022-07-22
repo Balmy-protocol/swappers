@@ -74,7 +74,7 @@ contract('TakeRunSwapAndTransfer', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData }],
+        calls: [{ swapper: swapper.address, swapData, value: 0 }],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
         contract: extensions,
@@ -84,16 +84,19 @@ contract('TakeRunSwapAndTransfer', () => {
 
     when('should check for unspent tokens', () => {
       given(async () => {
-        await extensions.takeRunSwapAndTransfer({
-          swapper: swapper.address,
-          allowanceTarget: swapper.address,
-          swapData: swapData,
-          tokenIn: tokenIn.address,
-          maxAmountIn: AMOUNT,
-          checkUnspentTokensIn: true,
-          tokenOut: tokenOut.address,
-          recipient: ACCOUNT,
-        });
+        await extensions.takeRunSwapAndTransfer(
+          {
+            swapper: swapper.address,
+            allowanceTarget: swapper.address,
+            swapData: swapData,
+            tokenIn: tokenIn.address,
+            maxAmountIn: AMOUNT,
+            checkUnspentTokensIn: true,
+            tokenOut: tokenOut.address,
+            recipient: ACCOUNT,
+          },
+          { value: 123456 }
+        );
       });
       thenAllowlistWasCheckedForSwappers(() => ({
         registry,
@@ -109,7 +112,7 @@ contract('TakeRunSwapAndTransfer', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData }],
+        calls: [{ swapper: swapper.address, swapData, value: 123456 }],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
         contract: extensions,

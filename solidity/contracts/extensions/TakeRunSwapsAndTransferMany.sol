@@ -48,7 +48,7 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
 
     // Execute swaps
     for (uint256 i; i < _parameters.swaps.length; i++) {
-      _executeSwap(_parameters.swappers[_parameters.swapperForSwap[i]], _parameters.swaps[i]);
+      _executeSwap(_parameters.swappers[_parameters.swapperForSwap[i]], _parameters.swaps[i], 0);
     }
 
     // Transfer out whatever was left in the contract
