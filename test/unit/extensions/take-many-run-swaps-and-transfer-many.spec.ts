@@ -59,24 +59,30 @@ contract('TakeManyRunSwapsAndTransferMany', () => {
   describe('takeManyRunSwapsAndTransferMany', () => {
     when('function is called', () => {
       given(async () => {
-        await extensions.takeManyRunSwapsAndTransferMany({
-          takeFromCaller: [
-            { token: tokenIn1.address, amount: AMOUNT },
-            { token: tokenIn2.address, amount: AMOUNT / 2 },
-          ],
-          allowanceTargets: [
-            { allowanceTarget: ACCOUNT, minAllowance: AMOUNT, token: tokenIn1.address },
-            { allowanceTarget: swapper1.address, minAllowance: 0, token: tokenIn2.address },
-          ],
-          swappers: [swapper1.address, swapper2.address],
-          swaps: [swapData, swapData],
-          swapperForSwap: [0, 1],
-          transferOutBalance: [
-            { token: tokenIn2.address, recipient: ACCOUNT },
-            { token: tokenOut1.address, recipient: ACCOUNT },
-            { token: tokenOut2.address, recipient: ACCOUNT },
-          ],
-        });
+        await extensions.takeManyRunSwapsAndTransferMany(
+          {
+            takeFromCaller: [
+              { token: tokenIn1.address, amount: AMOUNT },
+              { token: tokenIn2.address, amount: AMOUNT / 2 },
+            ],
+            allowanceTargets: [
+              { allowanceTarget: ACCOUNT, minAllowance: AMOUNT, token: tokenIn1.address },
+              { allowanceTarget: swapper1.address, minAllowance: 0, token: tokenIn2.address },
+            ],
+            swappers: [swapper1.address, swapper2.address],
+            swaps: [swapData, swapData],
+            swapContext: [
+              { value: 50000, swapperIndex: 0 },
+              { value: 150000, swapperIndex: 1 },
+            ],
+            transferOutBalance: [
+              { token: tokenIn2.address, recipient: ACCOUNT },
+              { token: tokenOut1.address, recipient: ACCOUNT },
+              { token: tokenOut2.address, recipient: ACCOUNT },
+            ],
+          },
+          { value: 200000 }
+        );
       });
       thenTakeFromMsgSenderIsCalledCorrectly(() => ({
         contract: extensions,
@@ -99,8 +105,8 @@ contract('TakeManyRunSwapsAndTransferMany', () => {
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
         calls: [
-          { swapper: swapper1.address, swapData, value: 0 },
-          { swapper: swapper2.address, swapData, value: 0 },
+          { swapper: swapper1.address, swapData, value: 50000 },
+          { swapper: swapper2.address, swapData, value: 150000 },
         ],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({

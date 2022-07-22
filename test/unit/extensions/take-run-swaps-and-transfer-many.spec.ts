@@ -56,21 +56,27 @@ contract('TakeRunSwapsAndTransferMany', () => {
   describe('takeRunSwapsAndTransferMany', () => {
     when('function is called', () => {
       given(async () => {
-        await extensions.takeRunSwapsAndTransferMany({
-          tokenIn: tokenIn.address,
-          maxAmountIn: AMOUNT,
-          allowanceTargets: [
-            { allowanceTarget: ACCOUNT, minAllowance: AMOUNT, token: tokenIn.address },
-            { allowanceTarget: swapper1.address, minAllowance: 0, token: tokenIn.address },
-          ],
-          swappers: [swapper1.address, swapper2.address],
-          swaps: [swapData, swapData],
-          swapperForSwap: [0, 1],
-          transferOutBalance: [
-            { token: tokenOut1.address, recipient: ACCOUNT },
-            { token: tokenOut2.address, recipient: ACCOUNT },
-          ],
-        });
+        await extensions.takeRunSwapsAndTransferMany(
+          {
+            tokenIn: tokenIn.address,
+            maxAmountIn: AMOUNT,
+            allowanceTargets: [
+              { allowanceTarget: ACCOUNT, minAllowance: AMOUNT, token: tokenIn.address },
+              { allowanceTarget: swapper1.address, minAllowance: 0, token: tokenIn.address },
+            ],
+            swappers: [swapper1.address, swapper2.address],
+            swaps: [swapData, swapData],
+            swapContext: [
+              { value: 150000, swapperIndex: 0 },
+              { value: 50000, swapperIndex: 1 },
+            ],
+            transferOutBalance: [
+              { token: tokenOut1.address, recipient: ACCOUNT },
+              { token: tokenOut2.address, recipient: ACCOUNT },
+            ],
+          },
+          { value: 200000 }
+        );
       });
       thenTakeFromMsgSenderIsCalledCorrectly(() => ({
         contract: extensions,
@@ -90,8 +96,8 @@ contract('TakeRunSwapsAndTransferMany', () => {
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
         calls: [
-          { swapper: swapper1.address, swapData, value: 0 },
-          { swapper: swapper2.address, swapData, value: 0 },
+          { swapper: swapper1.address, swapData, value: 150000 },
+          { swapper: swapper2.address, swapData, value: 50000 },
         ],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
