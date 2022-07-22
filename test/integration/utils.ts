@@ -37,7 +37,7 @@ export async function getQuoteAndAllowlistSwapper({
   quoter: (input: QuoteInput) => Promise<Quote>;
   recipient?: SignerWithAddress;
 }) {
-  const slippage = slippagePercentage ?? 0.3;
+  const slippage = slippagePercentage ?? 1;
   const quote = await quoter({
     tokenIn: tokenIn == 'ETH' ? ETH_ADDRESS : tokenIn.address,
     tokenOut: tokenOut == 'ETH' ? ETH_ADDRESS : tokenOut.address,
