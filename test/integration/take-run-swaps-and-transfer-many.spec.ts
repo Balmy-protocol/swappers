@@ -15,7 +15,7 @@ import {
 import { oneInchAdapter, paraswapAdapter } from './dex-adapters';
 import { expect } from 'chai';
 
-contract.only('SwapProxy', () => {
+contract('SwapProxy', () => {
   let registry: SwapperRegistry;
   let swapProxy: SwapProxy;
   let WETH: IERC20, USDC: IERC20;
