@@ -18,8 +18,7 @@ abstract contract SwapAdapter is ISwapAdapter, CollectableDust {
   }
 
   /// @inheritdoc ISwapAdapter
-  function revokeAllowances(RevokeAction[] calldata _revokeActions) external {
-    if (msg.sender != address(SWAPPER_REGISTRY)) revert OnlyRegistryCanRevoke();
+  function revokeAllowances(RevokeAction[] calldata _revokeActions) external onlyGovernor {
     for (uint256 i; i < _revokeActions.length; i++) {
       RevokeAction memory _action = _revokeActions[i];
       for (uint256 j; j < _action.tokens.length; j++) {

@@ -85,11 +85,4 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
     }
     emit RemovedAllowanceTargetsFromAllowlist(_allowanceTargets);
   }
-
-  /// @inheritdoc ISwapperRegistry
-  function revokeAllowances(RevokeAction[] calldata _revokeActions) external onlyRole(ADMIN_ROLE) {
-    for (uint256 i; i < _revokeActions.length; i++) {
-      _revokeActions[i].target.revokeAllowances(_revokeActions[i].revokeActions);
-    }
-  }
 }

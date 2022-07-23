@@ -85,11 +85,4 @@ interface ISwapperRegistry {
    * @param allowanceTargets The list of allowance targets to remove
    */
   function removeSupplementaryAllowanceTargetsFromAllowlist(address[] calldata allowanceTargets) external;
-
-  /**
-   * @notice Revokes ERC20 allowances for the given adapters
-   * @dev Can only be called by users with the admin role
-   * @param revokeActions The adapters and the revokes that they should execute
-   */
-  function revokeAllowances(RevokeAction[] calldata revokeActions) external;
 }
