@@ -6,6 +6,7 @@ import './extensions/TakeRunSwapAndTransfer.sol';
 import './extensions/TakeRunSwapsAndTransferMany.sol';
 import './extensions/TakeManyRunSwapAndTransferMany.sol';
 import './extensions/TakeManyRunSwapsAndTransferMany.sol';
+import './utils/CollectableDust.sol';
 
 /**
  * @notice This contract implements all swap extensions, so it can be used by EOAs or other contracts that do not have the extensions
@@ -15,7 +16,8 @@ contract SwapProxy is
   TakeRunSwapAndTransfer,
   TakeRunSwapsAndTransferMany,
   TakeManyRunSwapAndTransferMany,
-  TakeManyRunSwapsAndTransferMany
+  TakeManyRunSwapsAndTransferMany,
+  CollectableDust
 {
-  constructor(address _swapperRegistry) SwapAdapter(_swapperRegistry) {}
+  constructor(address _swapperRegistry, address _governor) SwapAdapter(_swapperRegistry) Governable(_governor) {}
 }
