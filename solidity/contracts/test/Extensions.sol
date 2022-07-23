@@ -42,7 +42,7 @@ contract Extensions is
   ExecuteSwapCall[] internal _executeSwapCalls;
   SendBalanceToRecipientCall[] internal _sendBalanceToRecipientCalls;
 
-  constructor(address _swapperRegistry) SwapAdapter(_swapperRegistry) {}
+  constructor(address _swapperRegistry) SwapAdapter(_swapperRegistry, address(1)) {}
 
   function takeFromMsgSenderCalls() external view returns (TakeFromMsgSenderCall[] memory) {
     return _takeFromMsgSenderCalls;

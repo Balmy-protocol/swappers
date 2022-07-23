@@ -3,17 +3,16 @@ pragma solidity >=0.8.7 <0.9.0;
 
 import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
+import './utils/CollectableDust.sol';
 import '../interfaces/ISwapAdapter.sol';
 
-address constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
-abstract contract SwapAdapter is ISwapAdapter {
+abstract contract SwapAdapter is ISwapAdapter, CollectableDust {
   using SafeERC20 for IERC20;
   using Address for address;
 
   ISwapperRegistry public immutable SWAPPER_REGISTRY;
 
-  constructor(address _swapperRegistry) {
+  constructor(address _swapperRegistry, address _governor) Governable(_governor) {
     if (_swapperRegistry == address(0)) revert ZeroAddress();
     SWAPPER_REGISTRY = ISwapperRegistry(_swapperRegistry);
   }

@@ -15,7 +15,7 @@ describe('SwapAdapter', () => {
   const ACCOUNT = '0x0000000000000000000000000000000000000001';
   const AMOUNT = 1000000;
 
-  let caller: SignerWithAddress;
+  let caller: SignerWithAddress, governor: SignerWithAddress;
   let swapAdapterFactory: SwapAdapterMock__factory;
   let swapAdapter: SwapAdapterMock;
   let swapper: MockContract<Swapper>;
@@ -24,12 +24,12 @@ describe('SwapAdapter', () => {
   let token: FakeContract<IERC20>;
 
   before('Setup accounts and contracts', async () => {
-    [caller] = await ethers.getSigners();
+    [caller, governor] = await ethers.getSigners();
     registry = await smock.fake('ISwapperRegistry');
     const swapperFactory = await smock.mock<Swapper__factory>('Swapper');
     swapper = await swapperFactory.deploy();
     swapAdapterFactory = await ethers.getContractFactory('solidity/contracts/test/SwapAdapter.sol:SwapAdapterMock');
-    swapAdapter = await swapAdapterFactory.deploy(registry.address);
+    swapAdapter = await swapAdapterFactory.deploy(registry.address, governor.address);
     token = await smock.fake('IERC20');
     snapshotId = await snapshot.take();
   });
@@ -53,7 +53,7 @@ describe('SwapAdapter', () => {
       then('tx is reverted with reason error', async () => {
         await behaviours.deployShouldRevertWithMessage({
           contract: swapAdapterFactory,
-          args: [constants.AddressZero],
+          args: [constants.AddressZero, governor.address],
           message: 'ZeroAddress',
         });
       });
