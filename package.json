@@ -1,7 +1,7 @@
 {
-  "name": "@mean-finance/swap-proxy",
-  "version": "0.0.0",
-  "description": "Mean Swap Proxy",
+  "name": "@mean-finance/swappers",
+  "version": "1.0.0-rc1",
+  "description": "Mean Swappers",
   "keywords": [
     "ethereum",
     "smart",
@@ -10,12 +10,13 @@
     "solidity",
     "hardhat",
     "swap",
+    "swappers",
     "proxy",
     "dex"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mean-finance/swap-proxy.git"
+    "url": "git+https://github.com/mean-finance/swappers.git"
   },
   "license": "AGPL-3.0-only",
   "contributors": [
