@@ -10,12 +10,6 @@ import './ISwapAdapter.sol';
  *         will also track those here
  */
 interface ISwapperRegistry {
-  /// @notice Describes how the allowance should be revoked for the given adapter
-  struct RevokeAction {
-    ISwapAdapter target;
-    ISwapAdapter.RevokeAction[] revokeActions;
-  }
-
   /// @notice Thrown when one of the parameters is a zero address
   error ZeroAddress();
 
