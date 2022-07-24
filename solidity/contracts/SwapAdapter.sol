@@ -5,17 +5,28 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 import '../interfaces/ISwapAdapter.sol';
 
-address constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
 abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
   using Address for address;
+  using Address for address payable;
 
+  /// @inheritdoc ISwapAdapter
+  address public constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+  /// @inheritdoc ISwapAdapter
   ISwapperRegistry public immutable SWAPPER_REGISTRY;
 
   constructor(address _swapperRegistry) {
     if (_swapperRegistry == address(0)) revert ZeroAddress();
     SWAPPER_REGISTRY = ISwapperRegistry(_swapperRegistry);
+  }
+
+  /// @inheritdoc ISwapAdapter
+  function getBalances(address[] calldata _tokens) external view returns (TokenBalance[] memory _balances) {
+    _balances = new TokenBalance[](_tokens.length);
+    for (uint256 i; i < _tokens.length; i++) {
+      uint256 _balance = _tokens[i] == PROTOCOL_TOKEN ? address(this).balance : IERC20(_tokens[i]).balanceOf(address(this));
+      _balances[i] = TokenBalance({token: _tokens[i], balance: _balance});
+    }
   }
 
   /// @inheritdoc ISwapAdapter
@@ -104,6 +115,27 @@ abstract contract SwapAdapter is ISwapAdapter {
    */
   function _assertSwapperIsAllowlisted(address _swapper) internal view {
     if (!SWAPPER_REGISTRY.isSwapperAllowlisted(_swapper)) revert SwapperNotAllowlisted(_swapper);
+  }
+
+  /**
+   * @notice Sends the given token to the recipient
+   * @dev If exposed, then it should be permissioned
+   * @param _token The token to send to the recipient (can be an ERC20 or the protocol token)
+   * @param _amount The amount to transfer to the recipient
+   * @param _recipient The address of the recipient
+   */
+  function _sendDust(
+    address _token,
+    uint256 _amount,
+    address _recipient
+  ) internal {
+    if (_recipient == address(0)) revert DustRecipientIsZeroAddress();
+    if (_token == PROTOCOL_TOKEN) {
+      payable(_recipient).sendValue(_amount);
+    } else {
+      IERC20(_token).safeTransfer(_recipient, _amount);
+    }
+    emit DustSent(_token, _amount, _recipient);
   }
 
   modifier onlyAllowlisted(address _swapper) {

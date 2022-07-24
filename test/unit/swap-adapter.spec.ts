@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import { BigNumber, constants, utils, Wallet } from 'ethers';
 import { behaviours, wallet } from '@utils';
 import { given, then, when } from '@utils/bdd';
-import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
+import { IERC20, ISwapAdapter, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
 import { snapshot } from '@utils/evm';
 import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -61,6 +61,49 @@ describe('SwapAdapter', () => {
     when('all arguments are valid', () => {
       then('registry is set correctly', async () => {
         expect(await swapAdapter.SWAPPER_REGISTRY()).to.equal(registry.address);
+      });
+      then('protocol token is set correctly', async () => {
+        expect(await swapAdapter.PROTOCOL_TOKEN()).to.equal('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE');
+      });
+    });
+  });
+
+  describe('getBalances', () => {
+    const BALANCE = utils.parseEther('0.1');
+    when('querying for an ERC20', () => {
+      let balances: ISwapAdapter.TokenBalanceStructOutput[];
+      given(async () => {
+        token.balanceOf.returns(BALANCE);
+        balances = await swapAdapter.getBalances([token.address]);
+      });
+      then('balance is queried correctly', () => {
+        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+      });
+      then('balances are returned correctly', async () => {
+        expect(balances.length).to.equal(1);
+        expect(balances[0].token).to.equal(token.address);
+        expect(balances[0].balance).to.equal(BALANCE);
+      });
+    });
+    when('querying for protocol token', () => {
+      let balances: ISwapAdapter.TokenBalanceStructOutput[];
+      given(async () => {
+        await wallet.setBalance({ account: swapAdapter.address, balance: BALANCE });
+        balances = await swapAdapter.getBalances([await swapAdapter.PROTOCOL_TOKEN()]);
+      });
+      then('balances are returned correctly', async () => {
+        expect(balances.length).to.equal(1);
+        expect(balances[0].token).to.equal(await swapAdapter.PROTOCOL_TOKEN());
+        expect(balances[0].balance).to.equal(BALANCE);
+      });
+    });
+    when('querying for an invalid address', () => {
+      let tx: Promise<ISwapAdapter.TokenBalanceStructOutput[]>;
+      given(() => {
+        tx = swapAdapter.getBalances([constants.AddressZero]);
+      });
+      then('tx is reverted', async () => {
+        await expect(tx).to.have.reverted;
       });
     });
   });
@@ -278,6 +321,52 @@ describe('SwapAdapter', () => {
           args: [ACCOUNT],
           message: 'SwapperNotAllowlisted',
         });
+      });
+    });
+  });
+
+  describe('_sendDust', () => {
+    when('sending dust to zero address', () => {
+      then('tx is reverted with reason', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapAdapter,
+          func: 'internalSendDust',
+          args: [token.address, 10, constants.AddressZero],
+          message: 'DustRecipientIsZeroAddress',
+        });
+      });
+    });
+    when('sending ETH dust', () => {
+      const INITIAL_DUST_BALANCE = utils.parseEther('1');
+      const DUST_TO_COLLECT = utils.parseEther('0.1');
+      let tx: TransactionResponse;
+      given(async () => {
+        await wallet.setBalance({ account: swapAdapter.address, balance: INITIAL_DUST_BALANCE });
+        tx = await swapAdapter.internalSendDust(await swapAdapter.PROTOCOL_TOKEN(), DUST_TO_COLLECT, ACCOUNT);
+      });
+      then('eth is collected from contract', async () => {
+        expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(INITIAL_DUST_BALANCE.sub(DUST_TO_COLLECT));
+      });
+      then('eth is sent to recipient', async () => {
+        expect(await ethers.provider.getBalance(ACCOUNT)).to.equal(DUST_TO_COLLECT);
+      });
+      then('event is emitted with arguments', async () => {
+        await expect(tx)
+          .to.emit(swapAdapter, 'DustSent')
+          .withArgs(await swapAdapter.PROTOCOL_TOKEN(), DUST_TO_COLLECT, ACCOUNT);
+      });
+    });
+    context('sending erc20 dust', () => {
+      const DUST_TO_COLLECT = utils.parseEther('0.1');
+      let tx: TransactionResponse;
+      given(async () => {
+        tx = await swapAdapter.internalSendDust(token.address, DUST_TO_COLLECT, ACCOUNT);
+      });
+      then('erc20 transfer is executed', async () => {
+        expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, DUST_TO_COLLECT);
+      });
+      then('event is emitted with arguments', async () => {
+        await expect(tx).to.emit(swapAdapter, 'DustSent').withArgs(token.address, DUST_TO_COLLECT, ACCOUNT);
       });
     });
   });

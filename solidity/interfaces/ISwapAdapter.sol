@@ -15,6 +15,12 @@ interface ISwapAdapter {
     IERC20[] tokens;
   }
 
+  /// @notice The balance of a given token
+  struct TokenBalance {
+    address token;
+    uint256 balance;
+  }
+
   /// @notice Thrown when one of the parameters is a zero address
   error ZeroAddress();
 
@@ -30,12 +36,38 @@ interface ISwapAdapter {
   /// @notice Thrown when someone who is not the registry tries to remoke an allowance
   error OnlyRegistryCanRevoke();
 
+  /// @notice Thrown when trying to send dust to the zero address
+  error DustRecipientIsZeroAddress();
+
+  /**
+   * @notice Emitted when dust is sent
+   * @param token The token that was sent
+   * @param amount The amount that was sent
+   * @param recipient The address that received the tokens
+   */
+  event DustSent(address token, uint256 amount, address recipient);
+
   /**
    * @notice Returns the address of the swapper registry
    * @dev Cannot be modified
    * @return The address of the swapper registry
    */
   function SWAPPER_REGISTRY() external view returns (ISwapperRegistry);
+
+  /**
+   * @notice Returns the address of the protocol token
+   * @dev Cannot be modified
+   * @return The address of the protocol token;
+   */
+  function PROTOCOL_TOKEN() external view returns (address);
+
+  /**
+   * @notice Returns the balance of each of the given tokens
+   * @dev Meant to be used for off-chain queries
+   * @param tokens The tokens to check the balance for, can be ERC20s or the protocol token
+   * @return The balances for the given tokens
+   */
+  function getBalances(address[] calldata tokens) external view returns (TokenBalance[] memory);
 
   /**
    * @notice Revokes ERC20 allowances for the given spenders
