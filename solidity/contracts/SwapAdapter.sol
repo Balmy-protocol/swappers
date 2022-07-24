@@ -19,6 +19,7 @@ abstract contract SwapAdapter is ISwapAdapter {
   }
 
   /// @inheritdoc ISwapAdapter
+<<<<<<< HEAD
   function revokeAllowances(RevokeAction[] calldata _revokeActions) external {
     if (msg.sender != address(SWAPPER_REGISTRY)) revert OnlyRegistryCanRevoke();
     for (uint256 i; i < _revokeActions.length; i++) {
@@ -26,6 +27,13 @@ abstract contract SwapAdapter is ISwapAdapter {
       for (uint256 j; j < _action.tokens.length; j++) {
         _action.tokens[j].approve(_action.spender, 0);
       }
+=======
+  function getBalances(address[] calldata _tokens) external view returns (TokenBalance[] memory _balances) {
+    _balances = new TokenBalance[](_tokens.length);
+    for (uint256 i; i < _tokens.length; i++) {
+      uint256 _balance = _tokens[i] == PROTOCOL_TOKEN ? address(this).balance : IERC20(_tokens[i]).balanceOf(address(this));
+      _balances[i] = TokenBalance({token: _tokens[i], balance: _balance});
+>>>>>>> 130a600 (refactor: make revoke internal)
     }
   }
 
@@ -104,6 +112,20 @@ abstract contract SwapAdapter is ISwapAdapter {
    */
   function _assertSwapperIsAllowlisted(address _swapper) internal view {
     if (!SWAPPER_REGISTRY.isSwapperAllowlisted(_swapper)) revert SwapperNotAllowlisted(_swapper);
+  }
+
+  /**
+   * @notice Revokes ERC20 allowances for the given spenders
+   * @dev If exposed, then it should be permissioned
+   * @param _revokeActions The spenders and tokens to revoke
+   */
+  function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal {
+    for (uint256 i; i < _revokeActions.length; i++) {
+      RevokeAction memory _action = _revokeActions[i];
+      for (uint256 j; j < _action.tokens.length; j++) {
+        _action.tokens[j].approve(_action.spender, 0);
+      }
+    }
   }
 
   modifier onlyAllowlisted(address _swapper) {

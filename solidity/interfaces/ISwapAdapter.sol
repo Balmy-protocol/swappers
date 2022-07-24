@@ -27,8 +27,16 @@ interface ISwapAdapter {
   /// @notice Thrown when the allowance target is not allowed by the swapper registry
   error InvalidAllowanceTarget(address spender);
 
-  /// @notice Thrown when someone who is not the registry tries to remoke an allowance
-  error OnlyRegistryCanRevoke();
+  /// @notice Thrown when trying to send dust to the zero address
+  error DustRecipientIsZeroAddress();
+
+  /**
+   * @notice Emitted when dust is sent
+   * @param token The token that was sent
+   * @param amount The amount that was sent
+   * @param recipient The address that received the tokens
+   */
+  event DustSent(address token, uint256 amount, address recipient);
 
   /**
    * @notice Returns the address of the swapper registry
@@ -37,10 +45,4 @@ interface ISwapAdapter {
    */
   function SWAPPER_REGISTRY() external view returns (ISwapperRegistry);
 
-  /**
-   * @notice Revokes ERC20 allowances for the given spenders
-   * @dev Can only be called by the registry
-   * @param revokeActions The spenders and tokens to revoke
-   */
-  function revokeAllowances(RevokeAction[] calldata revokeActions) external;
 }
