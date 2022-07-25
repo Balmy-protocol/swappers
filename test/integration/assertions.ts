@@ -17,3 +17,8 @@ export async function expectBalanceToBeGreatherThan(token: IERC20, minAmountOut:
   const balance = await token.balanceOf(hasAddress.address);
   expect(balance.gte(minAmountOut)).to.be.true;
 }
+
+export async function expectETHBalanceToBeGreatherThan(minAmountOut: BigNumber, hasAddress: { address: string }) {
+  const balance = await ethers.provider.getBalance(hasAddress.address);
+  expect(balance.gte(minAmountOut)).to.be.true;
+}
