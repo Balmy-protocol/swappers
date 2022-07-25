@@ -8,6 +8,7 @@ import '../interfaces/ISwapAdapter.sol';
 abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
   using Address for address;
+  using Address for address payable;
 
   /// @inheritdoc ISwapAdapter
   address public constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -78,7 +79,7 @@ abstract contract SwapAdapter is ISwapAdapter {
     if (_token == PROTOCOL_TOKEN) {
       uint256 _balance = address(this).balance;
       if (_balance > 0) {
-        payable(_recipient).transfer(_balance);
+        payable(_recipient).sendValue(_balance);
       }
     } else {
       uint256 _balance = IERC20(_token).balanceOf(address(this));
@@ -101,7 +102,7 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @dev If exposed, then it should be permissioned
    * @param _revokeActions The spenders and tokens to revoke
    */
-  function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal {
+  function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal virtual {
     for (uint256 i; i < _revokeActions.length; i++) {
       RevokeAction memory _action = _revokeActions[i];
       for (uint256 j; j < _action.tokens.length; j++) {
