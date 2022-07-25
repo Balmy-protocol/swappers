@@ -6,13 +6,15 @@ import '../extensions/TakeRunSwapAndTransfer.sol';
 import '../extensions/TakeRunSwapsAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
+import '../extensions/GetBalances.sol';
 
 contract Extensions is
   TakeAndRunSwap,
   TakeRunSwapAndTransfer,
   TakeRunSwapsAndTransferMany,
   TakeManyRunSwapAndTransferMany,
-  TakeManyRunSwapsAndTransferMany
+  TakeManyRunSwapsAndTransferMany,
+  GetBalances
 {
   struct TakeFromMsgSenderCall {
     IERC20 token;
