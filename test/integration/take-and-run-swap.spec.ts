@@ -28,7 +28,7 @@ contract('SwapProxy', () => {
   });
 
   describe('takeAndRunSwap', () => {
-    when('executing with ETH as token in', () => {
+    when('executing ETH => ERC20', () => {
       let minAmountOut: BigNumber;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
@@ -60,7 +60,7 @@ contract('SwapProxy', () => {
       then(`recipient has the expected amount of 'to' token`, () => expectBalanceToBeGreatherThan(USDC, minAmountOut, recipient));
     });
 
-    when('executing with WETH as token in ', () => {
+    when('executing ERC20 => ERC20', () => {
       let minAmountOut: BigNumber;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
