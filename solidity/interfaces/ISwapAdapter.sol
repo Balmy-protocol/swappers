@@ -27,22 +27,10 @@ interface ISwapAdapter {
   /// @notice Thrown when the allowance target is not allowed by the swapper registry
   error InvalidAllowanceTarget(address spender);
 
-  /// @notice Thrown when trying to send dust to the zero address
-  error DustRecipientIsZeroAddress();
-
-  /**
-   * @notice Emitted when dust is sent
-   * @param token The token that was sent
-   * @param amount The amount that was sent
-   * @param recipient The address that received the tokens
-   */
-  event DustSent(address token, uint256 amount, address recipient);
-
   /**
    * @notice Returns the address of the swapper registry
    * @dev Cannot be modified
    * @return The address of the swapper registry
    */
   function SWAPPER_REGISTRY() external view returns (ISwapperRegistry);
-
 }
