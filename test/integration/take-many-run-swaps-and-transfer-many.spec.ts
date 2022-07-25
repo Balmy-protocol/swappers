@@ -96,8 +96,8 @@ contract('SwapProxy', () => {
           { value: AMOUNT_ETH_WETH }
         );
         minAmountOutETHToUSDC = quoteETHToUSDC.minAmountOut;
-        minAmountOutWETHToUSDC = quoteWETHToUSDC.minAmountOut;
         minAmountOutUSDCToETH = quoteUSDCToETH.minAmountOut;
+        minAmountOutWETHToUSDC = quoteWETHToUSDC.minAmountOut;
       });
       then('caller has no USDC left', () => expectBalanceToBeEmpty(USDC, caller));
       then('caller has no WETH left', () => expectBalanceToBeEmpty(WETH, caller));
