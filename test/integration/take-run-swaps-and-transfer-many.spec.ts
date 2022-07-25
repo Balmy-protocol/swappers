@@ -18,13 +18,13 @@ import { expect } from 'chai';
 contract('SwapProxy', () => {
   let registry: SwapperRegistry;
   let swapProxy: SwapProxy;
-  let WETH: IERC20, USDC: IERC20;
+  let MANA: IERC20, USDC: IERC20;
   let usdcWhale: JsonRpcSigner;
   let caller: SignerWithAddress, recipient: SignerWithAddress;
   let snapshotId: string;
 
   before(async () => {
-    ({ registry, swapProxy, WETH, USDC, usdcWhale } = await deployContractsAndReturnSigners());
+    ({ registry, swapProxy, MANA, USDC, usdcWhale } = await deployContractsAndReturnSigners());
     [caller, , recipient] = await ethers.getSigners();
     snapshotId = await snapshot.take();
   });
@@ -34,9 +34,9 @@ contract('SwapProxy', () => {
   });
 
   describe('takeRunSwapsAndTransferMany', () => {
-    when('swapping ETH => [USDC, WETH]', () => {
+    when('swapping ETH => [USDC, MANA]', () => {
       const AMOUNT_ETH_PER_SWAP = utils.parseEther('0.5');
-      let minAmountOutETHToUSDC: BigNumber, minAmountOutETHToWETH: BigNumber;
+      let minAmountOutETHToUSDC: BigNumber, minAmountOutETHToMANA: BigNumber;
       given(async () => {
         const quoteETHToUSDC = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -47,11 +47,11 @@ contract('SwapProxy', () => {
           amount: AMOUNT_ETH_PER_SWAP,
           quoter: paraswapAdapter,
         });
-        const quoteETHToWETH = await getQuoteAndAllowlistSwapper({
+        const quoteETHToMANA = await getQuoteAndAllowlistSwapper({
           swapProxy,
           registry,
           tokenIn: 'ETH',
-          tokenOut: WETH,
+          tokenOut: MANA,
           trade: 'sell',
           amount: AMOUNT_ETH_PER_SWAP,
           quoter: oneInchAdapter,
@@ -61,65 +61,65 @@ contract('SwapProxy', () => {
             tokenIn: ETH_ADDRESS,
             maxAmountIn: 0,
             allowanceTargets: [],
-            swappers: [quoteETHToUSDC.swapperAddress, quoteETHToWETH.swapperAddress],
-            swaps: [quoteETHToUSDC.data, quoteETHToWETH.data],
+            swappers: [quoteETHToUSDC.swapperAddress, quoteETHToMANA.swapperAddress],
+            swaps: [quoteETHToUSDC.data, quoteETHToMANA.data],
             swapContext: [
               { swapperIndex: 0, value: AMOUNT_ETH_PER_SWAP },
               { swapperIndex: 1, value: AMOUNT_ETH_PER_SWAP },
             ],
             transferOutBalance: [
-              { token: WETH.address, recipient: recipient.address },
+              { token: MANA.address, recipient: recipient.address },
               { token: USDC.address, recipient: recipient.address },
             ],
           },
           { value: AMOUNT_ETH_PER_SWAP.mul(2) }
         );
         minAmountOutETHToUSDC = quoteETHToUSDC.minAmountOut;
-        minAmountOutETHToWETH = quoteETHToWETH.minAmountOut;
+        minAmountOutETHToMANA = quoteETHToMANA.minAmountOut;
       });
       then('caller has no USDC', () => expectBalanceToBeEmpty(USDC, caller));
-      then('caller has no WETH', () => expectBalanceToBeEmpty(WETH, caller));
+      then('caller has no MANA', () => expectBalanceToBeEmpty(MANA, caller));
       then('proxy has no USDC left', () => expectBalanceToBeEmpty(USDC, swapProxy));
-      then('proxy has no WETH left', () => expectBalanceToBeEmpty(WETH, swapProxy));
+      then('proxy has no MANA left', () => expectBalanceToBeEmpty(MANA, swapProxy));
       then('proxy has no ETH left', () => expectETHBalanceToBeEmpty(swapProxy));
       then('recipient has the expected amount of USDC', () => expectBalanceToBeGreatherThan(USDC, minAmountOutETHToUSDC, recipient));
-      then('recipient has the expected amount of WETH', () => expectBalanceToBeGreatherThan(WETH, minAmountOutETHToWETH, recipient));
+      then('recipient has the expected amount of MANA', () => expectBalanceToBeGreatherThan(MANA, minAmountOutETHToMANA, recipient));
     });
     when('swapping USDC => WETH => ETH', () => {
-      const AMOUNT_ETH_WETH = utils.parseEther('0.5');
+      const AMOUNT_MANA = utils.parseEther('1000');
       let minAmountOut: BigNumber;
       let initialRecipientEthBalance: BigNumber;
       given(async () => {
-        const quoteUSDCToWETH = await getQuoteAndAllowlistSwapper({
+        const quoteUSDCToMANA = await getQuoteAndAllowlistSwapper({
           swapProxy,
           registry,
           tokenIn: USDC,
-          tokenOut: WETH,
+          tokenOut: MANA,
           trade: 'buy',
-          amount: AMOUNT_ETH_WETH,
+          amount: AMOUNT_MANA,
           quoter: paraswapAdapter,
         });
-        const quoteWETHToETH = await getQuoteAndAllowlistSwapper({
+        const quoteMANAToETH = await getQuoteAndAllowlistSwapper({
           swapProxy,
           registry,
-          tokenIn: WETH,
+          tokenIn: MANA,
           tokenOut: 'ETH',
           trade: 'sell',
-          amount: AMOUNT_ETH_WETH,
+          amount: AMOUNT_MANA,
           quoter: oneInchAdapter,
         });
         initialRecipientEthBalance = await ethers.provider.getBalance(recipient.address);
-        await USDC.connect(usdcWhale).transfer(caller.address, quoteUSDCToWETH.maxAmountIn);
-        await USDC.connect(caller).approve(swapProxy.address, quoteUSDCToWETH.maxAmountIn);
+        await USDC.connect(usdcWhale).transfer(caller.address, quoteUSDCToMANA.maxAmountIn);
+        await USDC.connect(caller).approve(swapProxy.address, quoteUSDCToMANA.maxAmountIn);
         await swapProxy.connect(caller).takeRunSwapsAndTransferMany({
           tokenIn: USDC.address,
-          maxAmountIn: quoteUSDCToWETH.maxAmountIn,
+          maxAmountIn: quoteUSDCToMANA.maxAmountIn,
           allowanceTargets: [
-            { token: USDC.address, allowanceTarget: quoteUSDCToWETH.allowanceTarget, minAllowance: quoteUSDCToWETH.maxAmountIn },
-            { token: WETH.address, allowanceTarget: quoteWETHToETH.allowanceTarget, minAllowance: quoteWETHToETH.maxAmountIn },
+            { token: USDC.address, allowanceTarget: quoteUSDCToMANA.allowanceTarget, minAllowance: quoteUSDCToMANA.maxAmountIn },
+            { token: MANA.address, allowanceTarget: quoteMANAToETH.allowanceTarget, minAllowance: quoteMANAToETH.maxAmountIn },
           ],
-          swappers: [quoteUSDCToWETH.swapperAddress, quoteWETHToETH.swapperAddress],
-          swaps: [quoteUSDCToWETH.data, quoteWETHToETH.data],
+          swappers: [quoteUSDCToMANA.swapperAddress, quoteMANAToETH.swapperAddress],
+          swaps: [quoteUSDCToMANA.data, quoteMANAToETH.data],
           swapContext: [
             { swapperIndex: 0, value: 0 },
             { swapperIndex: 1, value: 0 },
@@ -129,16 +129,16 @@ contract('SwapProxy', () => {
             { token: ETH_ADDRESS, recipient: recipient.address },
           ],
         });
-        minAmountOut = quoteWETHToETH.minAmountOut;
+        minAmountOut = quoteMANAToETH.minAmountOut;
       });
       then('caller has some unspent USDC', async () => {
         // Since the slippage is big, we assume that we will get something back
         const balance = await USDC.balanceOf(caller.address);
         expect(balance.gt(0)).to.be.true;
       });
-      then('caller has no WETH', () => expectBalanceToBeEmpty(WETH, caller));
+      then('caller has no MANA', () => expectBalanceToBeEmpty(MANA, caller));
       then('proxy has no USDC left', () => expectBalanceToBeEmpty(USDC, swapProxy));
-      then('proxy has no WETH left', () => expectBalanceToBeEmpty(WETH, swapProxy));
+      then('proxy has no MANA left', () => expectBalanceToBeEmpty(MANA, swapProxy));
       then('proxy has no ETH left', () => expectETHBalanceToBeEmpty(swapProxy));
       then('recipient has the expected amount of ETH', () =>
         expectETHBalanceToBeGreatherThan(initialRecipientEthBalance.add(minAmountOut), recipient)
