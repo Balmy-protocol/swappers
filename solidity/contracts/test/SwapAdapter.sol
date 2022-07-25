@@ -31,14 +31,6 @@ contract SwapAdapterMock is SwapAdapter {
     _sendBalanceToRecipient(_token, _recipient);
   }
 
-  function internalSendDust(
-    address _token,
-    uint256 _amount,
-    address _recipient
-  ) external {
-    _sendDust(_token, _amount, _recipient);
-  }
-
   function internalAssertSwapperIsAllowlisted(address _swapper) external view {
     _assertSwapperIsAllowlisted(_swapper);
   }

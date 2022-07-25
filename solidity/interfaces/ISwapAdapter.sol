@@ -30,17 +30,6 @@ interface ISwapAdapter {
   /// @notice Thrown when someone who is not the registry tries to remoke an allowance
   error OnlyRegistryCanRevoke();
 
-  /// @notice Thrown when trying to send dust to the zero address
-  error DustRecipientIsZeroAddress();
-
-  /**
-   * @notice Emitted when dust is sent
-   * @param token The token that was sent
-   * @param amount The amount that was sent
-   * @param recipient The address that received the tokens
-   */
-  event DustSent(address token, uint256 amount, address recipient);
-
   /**
    * @notice Returns the address of the swapper registry
    * @dev Cannot be modified
