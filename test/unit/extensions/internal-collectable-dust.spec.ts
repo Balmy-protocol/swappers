@@ -11,7 +11,7 @@ import { TransactionResponse } from '@ethersproject/abstract-provider';
 
 chai.use(smock.matchers);
 
-contract.only('InternalCollectableDust', () => {
+contract('InternalCollectableDust', () => {
   const ACCOUNT = '0x0000000000000000000000000000000000000001';
 
   let caller: SignerWithAddress;
