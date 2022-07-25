@@ -8,7 +8,7 @@ This repository holds Mean's swapping infra. We can divide it into 4 different c
 
 ## 1. The Swapper Registry
 
-This contract will function as a registry for all allowed swappers. Since we will allow swappers to take arbitrary calls, we need to have an allowlist. If we didn't, then we could easily get attacked.
+This contract will function as a registry for all allowed swappers and allowance targets. Since we will allow swappers to take arbitrary calls and approve arbitrary addresses, we need to have an allowlist. If we didn't, then we could easily get attacked.
 
 ## 2. The Swap Adapter
 
@@ -41,7 +41,7 @@ To install with [**Hardhat**](https://github.com/nomiclabs/hardhat) or [**Truffl
 #### YARN
 
 ```sh
-yarn install @mean-finance/swappers
+yarn add @mean-finance/swappers
 ```
 
 ### NPM
