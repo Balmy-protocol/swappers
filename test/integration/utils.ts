@@ -15,6 +15,8 @@ const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const WETH_WHALE_ADDRESS = '0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e';
 const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
 const USDC_WHALE_ADDRESS = '0x0a59649758aa4d66e25f08dd01271e891fe52199';
+const MANA_ADDRESS = '0x0f5d2fb29fb7d3cfee444a200298f468908cc942';
+const MANA_WHALE_ADDRESS = '0xefb94ac00f1cee8a89d5c3f49faa799da6f03024';
 
 export async function getQuoteAndAllowlistSwapper({
   swapProxy,
@@ -75,12 +77,15 @@ export async function deployContractsAndReturnSigners() {
   const swapProxy = await ethers.getContract<SwapProxy>('SwapProxy');
   const WETH = await ethers.getContractAt<IERC20>(IERC20_ABI, WETH_ADDRESS);
   const USDC = await ethers.getContractAt<IERC20>(IERC20_ABI, USDC_ADDRESS);
+  const MANA = await ethers.getContractAt<IERC20>(IERC20_ABI, MANA_ADDRESS);
 
   const wethWhale = await wallet.impersonate(WETH_WHALE_ADDRESS);
   await wallet.setBalance({ account: WETH_WHALE_ADDRESS, balance: BigNumber.from('0xffffffffffffffff') });
   const usdcWhale = await wallet.impersonate(USDC_WHALE_ADDRESS);
   await wallet.setBalance({ account: USDC_WHALE_ADDRESS, balance: BigNumber.from('0xffffffffffffffff') });
-  return { registry, swapProxy, WETH, USDC, wethWhale, usdcWhale };
+  const manaWhale = await wallet.impersonate(MANA_WHALE_ADDRESS);
+  await wallet.setBalance({ account: MANA_WHALE_ADDRESS, balance: BigNumber.from('0xffffffffffffffff') });
+  return { registry, swapProxy, WETH, USDC, MANA, wethWhale, usdcWhale, manaWhale };
 }
 
 const DETERMINISTIC_FACTORY_ADMIN = '0x1a00e1e311009e56e3b0b9ed6f86f5ce128a1c01';
