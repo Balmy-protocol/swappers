@@ -31,6 +31,10 @@ contract SwapAdapterMock is SwapAdapter {
     _sendBalanceToRecipient(_token, _recipient);
   }
 
+  function internalRevokeAllowances(RevokeAction[] calldata _revokeActions) external {
+    _revokeAllowances(_revokeActions);
+  }
+
   function internalAssertSwapperIsAllowlisted(address _swapper) external view {
     _assertSwapperIsAllowlisted(_swapper);
   }

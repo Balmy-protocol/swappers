@@ -5,9 +5,8 @@ import { behaviours } from '@utils';
 import { given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
-import { SwapAdapter, SwapperRegistry, SwapperRegistry__factory } from '@typechained';
+import { SwapperRegistry, SwapperRegistry__factory } from '@typechained';
 import { snapshot } from '@utils/evm';
-import { FakeContract, smock } from '@defi-wonderland/smock';
 
 describe('SwapperRegistry', () => {
   const ALLOWED_SWAPPER = '0x0000000000000000000000000000000000000001';
@@ -160,36 +159,6 @@ describe('SwapperRegistry', () => {
       contract: () => swapperRegistry,
       funcAndSignature: 'removeSupplementaryAllowanceTargetsFromAllowlist',
       params: () => [[SUPPLEMENTARY_ALLOWANCE_TARGET]],
-      addressWithRole: () => admin,
-      role: () => adminRole,
-    });
-  });
-
-  describe('revokeAllowances', () => {
-    when('trying to revoke allowances', () => {
-      const SPENDER = '0x0000000000000000000000000000000000000005';
-      const TOKEN = '0x0000000000000000000000000000000000000006';
-      let swapAdapter: FakeContract<SwapAdapter>;
-      given(async () => {
-        swapAdapter = await smock.fake('SwapAdapter');
-        await swapperRegistry
-          .connect(admin)
-          .revokeAllowances([{ target: swapAdapter.address, revokeActions: [{ spender: SPENDER, tokens: [TOKEN] }] }]);
-      });
-      then('swap adapter is called correctly', async () => {
-        expect(swapAdapter.revokeAllowances).to.have.been.calledOnce;
-        const args = swapAdapter.revokeAllowances.getCall(0).args as any[];
-        expect(args).to.have.lengthOf(1);
-        const revokeActions = args[0];
-        expect(revokeActions).to.have.lengthOf(1);
-        expect(revokeActions[0].spender).to.equal(SPENDER);
-        expect(revokeActions[0].tokens).to.eql([TOKEN]);
-      });
-    });
-    behaviours.shouldBeExecutableOnlyByRole({
-      contract: () => swapperRegistry,
-      funcAndSignature: 'revokeAllowances',
-      params: () => [[]],
       addressWithRole: () => admin,
       role: () => adminRole,
     });

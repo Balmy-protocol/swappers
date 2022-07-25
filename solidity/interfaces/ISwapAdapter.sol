@@ -27,20 +27,10 @@ interface ISwapAdapter {
   /// @notice Thrown when the allowance target is not allowed by the swapper registry
   error InvalidAllowanceTarget(address spender);
 
-  /// @notice Thrown when someone who is not the registry tries to remoke an allowance
-  error OnlyRegistryCanRevoke();
-
   /**
    * @notice Returns the address of the swapper registry
    * @dev Cannot be modified
    * @return The address of the swapper registry
    */
   function SWAPPER_REGISTRY() external view returns (ISwapperRegistry);
-
-  /**
-   * @notice Revokes ERC20 allowances for the given spenders
-   * @dev Can only be called by the registry
-   * @param revokeActions The spenders and tokens to revoke
-   */
-  function revokeAllowances(RevokeAction[] calldata revokeActions) external;
 }
