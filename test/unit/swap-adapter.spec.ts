@@ -68,25 +68,13 @@ describe('SwapAdapter', () => {
     });
   });
 
-  describe('revokeAllowances', () => {
+  describe('_revokeAllowances', () => {
     when('function is called', () => {
       given(async () => {
-        const registrySigner = await wallet.impersonate(registry.address);
-        await wallet.setBalance({ account: registrySigner._address, balance: utils.parseEther('10') });
-        await swapAdapter.connect(registrySigner).revokeAllowances([{ spender: ACCOUNT, tokens: [token.address] }]);
+        await swapAdapter.internalRevokeAllowances([{ spender: ACCOUNT, tokens: [token.address] }]);
       });
       then('allowance is revoked', async () => {
         expect(token.approve).to.have.been.calledOnceWith(ACCOUNT, 0);
-      });
-    });
-    when('caller is not the signer', () => {
-      then('reverts with message', async () => {
-        await behaviours.txShouldRevertWithMessage({
-          contract: swapAdapter,
-          func: 'revokeAllowances',
-          args: [[]],
-          message: 'OnlyRegistryCanRevoke',
-        });
       });
     });
   });
