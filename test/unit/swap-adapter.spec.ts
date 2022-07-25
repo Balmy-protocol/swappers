@@ -3,7 +3,7 @@ import { ethers } from 'hardhat';
 import { BigNumber, constants, utils, Wallet } from 'ethers';
 import { behaviours, wallet } from '@utils';
 import { given, then, when } from '@utils/bdd';
-import { IERC20, ISwapAdapter, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
+import { IERC20, ISwapperRegistry, SwapAdapterMock, SwapAdapterMock__factory, Swapper, Swapper__factory } from '@typechained';
 import { snapshot } from '@utils/evm';
 import { FakeContract, MockContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
@@ -64,46 +64,6 @@ describe('SwapAdapter', () => {
       });
       then('protocol token is set correctly', async () => {
         expect(await swapAdapter.PROTOCOL_TOKEN()).to.equal('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE');
-      });
-    });
-  });
-
-  describe('getBalances', () => {
-    const BALANCE = utils.parseEther('0.1');
-    when('querying for an ERC20', () => {
-      let balances: ISwapAdapter.TokenBalanceStructOutput[];
-      given(async () => {
-        token.balanceOf.returns(BALANCE);
-        balances = await swapAdapter.getBalances([token.address]);
-      });
-      then('balance is queried correctly', () => {
-        expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
-      });
-      then('balances are returned correctly', async () => {
-        expect(balances.length).to.equal(1);
-        expect(balances[0].token).to.equal(token.address);
-        expect(balances[0].balance).to.equal(BALANCE);
-      });
-    });
-    when('querying for protocol token', () => {
-      let balances: ISwapAdapter.TokenBalanceStructOutput[];
-      given(async () => {
-        await wallet.setBalance({ account: swapAdapter.address, balance: BALANCE });
-        balances = await swapAdapter.getBalances([await swapAdapter.PROTOCOL_TOKEN()]);
-      });
-      then('balances are returned correctly', async () => {
-        expect(balances.length).to.equal(1);
-        expect(balances[0].token).to.equal(await swapAdapter.PROTOCOL_TOKEN());
-        expect(balances[0].balance).to.equal(BALANCE);
-      });
-    });
-    when('querying for an invalid address', () => {
-      let tx: Promise<ISwapAdapter.TokenBalanceStructOutput[]>;
-      given(() => {
-        tx = swapAdapter.getBalances([constants.AddressZero]);
-      });
-      then('tx is reverted', async () => {
-        await expect(tx).to.have.reverted;
       });
     });
   });

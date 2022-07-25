@@ -21,15 +21,6 @@ abstract contract SwapAdapter is ISwapAdapter {
   }
 
   /// @inheritdoc ISwapAdapter
-  function getBalances(address[] calldata _tokens) external view returns (TokenBalance[] memory _balances) {
-    _balances = new TokenBalance[](_tokens.length);
-    for (uint256 i; i < _tokens.length; i++) {
-      uint256 _balance = _tokens[i] == PROTOCOL_TOKEN ? address(this).balance : IERC20(_tokens[i]).balanceOf(address(this));
-      _balances[i] = TokenBalance({token: _tokens[i], balance: _balance});
-    }
-  }
-
-  /// @inheritdoc ISwapAdapter
   function revokeAllowances(RevokeAction[] calldata _revokeActions) external {
     if (msg.sender != address(SWAPPER_REGISTRY)) revert OnlyRegistryCanRevoke();
     for (uint256 i; i < _revokeActions.length; i++) {
