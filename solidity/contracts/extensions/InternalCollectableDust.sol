@@ -35,7 +35,7 @@ abstract contract InternalCollectableDust is SwapAdapter {
     address _token,
     uint256 _amount,
     address _recipient
-  ) internal {
+  ) internal virtual {
     if (_recipient == address(0)) revert DustRecipientIsZeroAddress();
     if (_token == PROTOCOL_TOKEN) {
       payable(_recipient).sendValue(_amount);
