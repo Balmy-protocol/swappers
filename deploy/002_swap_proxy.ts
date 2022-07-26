@@ -4,7 +4,7 @@ import { deployThroughDeterministicFactory } from '@mean-finance/deterministic-f
 import { DeployFunction } from '@0xged/hardhat-deploy/dist/types';
 
 const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployer } = await hre.getNamedAccounts();
+  const { deployer, admin } = await hre.getNamedAccounts();
 
   const registry = await hre.deployments.get('SwapperRegistry');
 
@@ -15,8 +15,8 @@ const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnviro
     contract: 'solidity/contracts/SwapProxy.sol:SwapProxy',
     bytecode: SwapProxy__factory.bytecode,
     constructorArgs: {
-      types: ['address'],
-      values: [registry.address],
+      types: ['address', 'address'],
+      values: [registry.address, admin],
     },
     log: !process.env.TEST,
     overrides: {
