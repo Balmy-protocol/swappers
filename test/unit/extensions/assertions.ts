@@ -86,3 +86,17 @@ export function thenRevokeWasCalledCorrectly(args: () => { contract: Extensions;
     }
   });
 }
+
+export function thenSendDustWasCalledCorrectly(
+  args: () => { contract: Extensions; calls: { token: string; amount: BigNumberish; recipient: string }[] }
+) {
+  then('send dust was called correctly', async () => {
+    const { contract, calls: expectedCalls } = args();
+    const calls = await contract.sendDustCalls();
+    for (let i = 0; i < calls.length; i++) {
+      expect(calls[i].token).to.equal(expectedCalls[i].token);
+      expect(calls[i].amount).to.equal(expectedCalls[i].amount);
+      expect(calls[i].recipient).to.equal(expectedCalls[i].recipient);
+    }
+  });
+}

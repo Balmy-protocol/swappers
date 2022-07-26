@@ -9,6 +9,7 @@ import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
 import '../extensions/GetBalances.sol';
 import '../extensions/InternalCollectableDust.sol';
 import '../extensions/RevokableWithGovernor.sol';
+import '../extensions/CollectableWithGovernor.sol';
 
 contract Extensions is
   TakeAndRunSwap,
@@ -18,7 +19,8 @@ contract Extensions is
   TakeManyRunSwapsAndTransferMany,
   GetBalances,
   InternalCollectableDust,
-  RevokableWithGovernor
+  RevokableWithGovernor,
+  CollectableWithGovernor
 {
   struct TakeFromMsgSenderCall {
     IERC20 token;
@@ -43,11 +45,18 @@ contract Extensions is
     address recipient;
   }
 
+  struct SendDustCall {
+    address token;
+    uint256 amount;
+    address recipient;
+  }
+
   TakeFromMsgSenderCall[] internal _takeFromMsgSenderCalls;
   MaxApproveSpenderCall[] internal _maxApproveSpenderCalls;
   ExecuteSwapCall[] internal _executeSwapCalls;
   SendBalanceToRecipientCall[] internal _sendBalanceToRecipientCalls;
   RevokeAction[][] internal _revokeCalls;
+  SendDustCall[] internal _sendDustCalls;
 
   constructor(address _swapperRegistry, address _governor) SwapAdapter(_swapperRegistry) Governable(_governor) {}
 
@@ -69,6 +78,10 @@ contract Extensions is
 
   function revokeAllowancesCalls() external view returns (RevokeAction[][] memory) {
     return _revokeCalls;
+  }
+
+  function sendDustCalls() external view returns (SendDustCall[] memory) {
+    return _sendDustCalls;
   }
 
   function _takeFromMsgSender(IERC20 _token, uint256 _amount) internal override {
@@ -115,5 +128,14 @@ contract Extensions is
       _revokeCalls[_currentCall].push(_revokeActions[i]);
     }
     super._revokeAllowances(_revokeActions);
+  }
+
+  function _sendDust(
+    address _token,
+    uint256 _amount,
+    address _recipient
+  ) internal override {
+    _sendDustCalls.push(SendDustCall(_token, _amount, _recipient));
+    super._sendDust(_token, _amount, _recipient);
   }
 }
