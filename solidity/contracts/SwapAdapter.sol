@@ -5,12 +5,13 @@ import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import '@openzeppelin/contracts/utils/Address.sol';
 import '../interfaces/ISwapAdapter.sol';
 
-address constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
 abstract contract SwapAdapter is ISwapAdapter {
   using SafeERC20 for IERC20;
   using Address for address;
 
+  /// @inheritdoc ISwapAdapter
+  address public constant PROTOCOL_TOKEN = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
+  /// @inheritdoc ISwapAdapter
   ISwapperRegistry public immutable SWAPPER_REGISTRY;
 
   constructor(address _swapperRegistry) {

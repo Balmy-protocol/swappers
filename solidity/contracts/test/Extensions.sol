@@ -7,6 +7,7 @@ import '../extensions/TakeRunSwapsAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
 import '../extensions/GetBalances.sol';
+import '../extensions/InternalCollectableDust.sol';
 
 contract Extensions is
   TakeAndRunSwap,
@@ -14,7 +15,8 @@ contract Extensions is
   TakeRunSwapsAndTransferMany,
   TakeManyRunSwapAndTransferMany,
   TakeManyRunSwapsAndTransferMany,
-  GetBalances
+  GetBalances,
+  InternalCollectableDust
 {
   struct TakeFromMsgSenderCall {
     IERC20 token;
@@ -89,5 +91,13 @@ contract Extensions is
   function _sendBalanceToRecipient(address _token, address _recipient) internal override {
     _sendBalanceToRecipientCalls.push(SendBalanceToRecipientCall(_token, _recipient));
     super._sendBalanceToRecipient(_token, _recipient);
+  }
+
+  function internalSendDust(
+    address _token,
+    uint256 _amount,
+    address _recipient
+  ) external {
+    _sendDust(_token, _amount, _recipient);
   }
 }

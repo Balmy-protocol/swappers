@@ -12,7 +12,7 @@ import {
   expectETHBalanceToBeEmpty,
   expectETHBalanceToBeGreatherThan,
 } from './assertions';
-import { oneInchAdapter, paraswapAdapter, zrxAdapter } from './dex-adapters';
+import { paraswapAdapter, zrxAdapter } from './dex-adapters';
 
 contract('SwapProxy', () => {
   let registry: SwapperRegistry;
@@ -55,7 +55,7 @@ contract('SwapProxy', () => {
           tokenOut: 'ETH',
           trade: 'sell',
           amount: AMOUNT_USDC,
-          quoter: oneInchAdapter,
+          quoter: zrxAdapter,
         });
         const quoteWETHToUSDC = await getQuoteAndAllowlistSwapper({
           swapProxy,

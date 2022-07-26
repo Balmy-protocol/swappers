@@ -33,4 +33,11 @@ interface ISwapAdapter {
    * @return The address of the swapper registry
    */
   function SWAPPER_REGISTRY() external view returns (ISwapperRegistry);
+
+  /**
+   * @notice Returns the address of the protocol token
+   * @dev Cannot be modified
+   * @return The address of the protocol token;
+   */
+  function PROTOCOL_TOKEN() external view returns (address);
 }

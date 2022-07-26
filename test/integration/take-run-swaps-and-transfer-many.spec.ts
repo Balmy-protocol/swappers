@@ -12,7 +12,7 @@ import {
   expectETHBalanceToBeEmpty,
   expectETHBalanceToBeGreatherThan,
 } from './assertions';
-import { oneInchAdapter, paraswapAdapter } from './dex-adapters';
+import { paraswapAdapter, zrxAdapter } from './dex-adapters';
 import { expect } from 'chai';
 
 contract('SwapProxy', () => {
@@ -54,7 +54,7 @@ contract('SwapProxy', () => {
           tokenOut: MANA,
           trade: 'sell',
           amount: AMOUNT_ETH_PER_SWAP,
-          quoter: oneInchAdapter,
+          quoter: zrxAdapter,
         });
         await swapProxy.connect(caller).takeRunSwapsAndTransferMany(
           {
@@ -85,7 +85,7 @@ contract('SwapProxy', () => {
       then('recipient has the expected amount of USDC', () => expectBalanceToBeGreatherThan(USDC, minAmountOutETHToUSDC, recipient));
       then('recipient has the expected amount of MANA', () => expectBalanceToBeGreatherThan(MANA, minAmountOutETHToMANA, recipient));
     });
-    when('swapping USDC => WETH => ETH', () => {
+    when('swapping USDC => MANA => ETH', () => {
       const AMOUNT_MANA = utils.parseEther('1000');
       let minAmountOut: BigNumber;
       let initialRecipientEthBalance: BigNumber;
@@ -106,7 +106,7 @@ contract('SwapProxy', () => {
           tokenOut: 'ETH',
           trade: 'sell',
           amount: AMOUNT_MANA,
-          quoter: oneInchAdapter,
+          quoter: zrxAdapter,
         });
         initialRecipientEthBalance = await ethers.provider.getBalance(recipient.address);
         await USDC.connect(usdcWhale).transfer(caller.address, quoteUSDCToMANA.maxAmountIn);

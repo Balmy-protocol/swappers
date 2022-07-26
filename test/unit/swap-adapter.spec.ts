@@ -62,6 +62,9 @@ describe('SwapAdapter', () => {
       then('registry is set correctly', async () => {
         expect(await swapAdapter.SWAPPER_REGISTRY()).to.equal(registry.address);
       });
+      then('protocol token is set correctly', async () => {
+        expect(await swapAdapter.PROTOCOL_TOKEN()).to.equal('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE');
+      });
     });
   });
 
