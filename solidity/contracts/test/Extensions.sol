@@ -6,6 +6,7 @@ import '../extensions/TakeRunSwapAndTransfer.sol';
 import '../extensions/TakeRunSwapsAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
+import '../extensions/GetBalances.sol';
 import '../extensions/InternalCollectableDust.sol';
 
 contract Extensions is
@@ -14,6 +15,7 @@ contract Extensions is
   TakeRunSwapsAndTransferMany,
   TakeManyRunSwapAndTransferMany,
   TakeManyRunSwapsAndTransferMany,
+  GetBalances,
   InternalCollectableDust
 {
   struct TakeFromMsgSenderCall {

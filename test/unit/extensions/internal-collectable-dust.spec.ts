@@ -64,7 +64,7 @@ contract('InternalCollectableDust', () => {
           .withArgs(await extensions.PROTOCOL_TOKEN(), DUST_TO_COLLECT, ACCOUNT);
       });
     });
-    context('sending erc20 dust', () => {
+    when('sending erc20 dust', () => {
       const DUST_TO_COLLECT = utils.parseEther('0.1');
       let tx: TransactionResponse;
       given(async () => {
