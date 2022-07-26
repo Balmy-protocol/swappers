@@ -73,3 +73,16 @@ export function thenAllowlistWasCheckedForSwappers(args: () => { registry: FakeC
     }
   });
 }
+
+export function thenRevokeWasCalledCorrectly(args: () => { contract: Extensions; calls: { spender: string; tokens: string[] }[][] }) {
+  then('revoke was called correctly', async () => {
+    const { contract, calls: expectedCalls } = args();
+    const calls = await contract.revokeAllowancesCalls();
+    for (let i = 0; i < calls.length; i++) {
+      for (let j = 0; j < calls[i].length; j++) {
+        expect(calls[i][j].spender).to.equal(expectedCalls[i][j].spender);
+        expect(calls[i][j].tokens).to.eql(expectedCalls[i][j].tokens);
+      }
+    }
+  });
+}

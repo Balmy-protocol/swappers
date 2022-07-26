@@ -8,6 +8,7 @@ import '../extensions/TakeManyRunSwapAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
 import '../extensions/GetBalances.sol';
 import '../extensions/InternalCollectableDust.sol';
+import '../extensions/RevokableWithGovernor.sol';
 
 contract Extensions is
   TakeAndRunSwap,
@@ -16,7 +17,8 @@ contract Extensions is
   TakeManyRunSwapAndTransferMany,
   TakeManyRunSwapsAndTransferMany,
   GetBalances,
-  InternalCollectableDust
+  InternalCollectableDust,
+  RevokableWithGovernor
 {
   struct TakeFromMsgSenderCall {
     IERC20 token;
@@ -45,8 +47,9 @@ contract Extensions is
   MaxApproveSpenderCall[] internal _maxApproveSpenderCalls;
   ExecuteSwapCall[] internal _executeSwapCalls;
   SendBalanceToRecipientCall[] internal _sendBalanceToRecipientCalls;
+  RevokeAction[][] internal _revokeCalls;
 
-  constructor(address _swapperRegistry) SwapAdapter(_swapperRegistry) {}
+  constructor(address _swapperRegistry, address _governor) SwapAdapter(_swapperRegistry) Governable(_governor) {}
 
   function takeFromMsgSenderCalls() external view returns (TakeFromMsgSenderCall[] memory) {
     return _takeFromMsgSenderCalls;
@@ -62,6 +65,10 @@ contract Extensions is
 
   function sendBalanceToRecipientCalls() external view returns (SendBalanceToRecipientCall[] memory) {
     return _sendBalanceToRecipientCalls;
+  }
+
+  function revokeAllowancesCalls() external view returns (RevokeAction[][] memory) {
+    return _revokeCalls;
   }
 
   function _takeFromMsgSender(IERC20 _token, uint256 _amount) internal override {
@@ -99,5 +106,14 @@ contract Extensions is
     address _recipient
   ) external {
     _sendDust(_token, _amount, _recipient);
+  }
+
+  function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal override {
+    _revokeCalls.push();
+    uint256 _currentCall = _revokeCalls.length - 1;
+    for (uint256 i; i < _revokeActions.length; i++) {
+      _revokeCalls[_currentCall].push(_revokeActions[i]);
+    }
+    super._revokeAllowances(_revokeActions);
   }
 }

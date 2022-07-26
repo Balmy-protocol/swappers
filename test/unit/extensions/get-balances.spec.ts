@@ -22,7 +22,7 @@ contract('GetBalances', () => {
     [caller] = await ethers.getSigners();
     token = await smock.fake('IERC20');
     const factory: Extensions__factory = await ethers.getContractFactory('solidity/contracts/test/Extensions.sol:Extensions');
-    extensions = await factory.deploy(ACCOUNT);
+    extensions = await factory.deploy(ACCOUNT, ACCOUNT);
     snapshotId = await snapshot.take();
   });
 
