@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
+import '../extensions/RunSwap.sol';
 import '../extensions/TakeAndRunSwap.sol';
 import '../extensions/TakeRunSwapAndTransfer.sol';
 import '../extensions/TakeRunSwapsAndTransferMany.sol';
@@ -12,6 +13,7 @@ import '../extensions/RevokableWithGovernor.sol';
 import '../extensions/CollectableWithGovernor.sol';
 
 contract Extensions is
+  RunSwap,
   TakeAndRunSwap,
   TakeRunSwapAndTransfer,
   TakeRunSwapsAndTransferMany,
