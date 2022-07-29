@@ -4,7 +4,7 @@ import { deployThroughDeterministicFactory } from '@mean-finance/deterministic-f
 import { DeployFunction } from '@0xged/hardhat-deploy/dist/types';
 
 const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployer, admin } = await hre.getNamedAccounts();
+  const { deployer, governor } = await hre.getNamedAccounts();
 
   const registry = await hre.deployments.get('SwapperRegistry');
 
@@ -16,7 +16,7 @@ const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnviro
     bytecode,
     constructorArgs: {
       types: ['address', 'address'],
-      values: [registry.address, admin],
+      values: [registry.address, governor],
     },
     log: !process.env.TEST,
     overrides: {

@@ -60,7 +60,7 @@ export async function getQuoteAndAllowlistSwapper({
     maxAmountIn = amountIn.add(calculatePercentage(amountIn, slippage));
     minAmountOut = amountOut;
   }
-  const { admin: adminAddress } = await getNamedAccounts();
+  const { governor: adminAddress } = await getNamedAccounts();
   const admin = await wallet.impersonate(adminAddress);
   await ethers.provider.send('hardhat_setBalance', [adminAddress, '0xffffffffffffffff']);
   await registry.connect(admin).allowSwappers([quote.swapperAddress]);
