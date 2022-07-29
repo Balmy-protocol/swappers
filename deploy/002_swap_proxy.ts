@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { SwapProxy__factory } from '@typechained';
+import { bytecode } from '../artifacts/solidity/contracts/SwapProxy.sol/SwapProxy.json';
 import { deployThroughDeterministicFactory } from '@mean-finance/deterministic-factory/utils/deployment';
 import { DeployFunction } from '@0xged/hardhat-deploy/dist/types';
 
@@ -13,7 +13,7 @@ const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnviro
     name: 'SwapProxy',
     salt: 'MF-Swap-Proxy-V1',
     contract: 'solidity/contracts/SwapProxy.sol:SwapProxy',
-    bytecode: SwapProxy__factory.bytecode,
+    bytecode,
     constructorArgs: {
       types: ['address', 'address'],
       values: [registry.address, admin],
