@@ -258,6 +258,40 @@ describe('SwapAdapter', () => {
     });
   });
 
+  describe('_sendToRecipient', () => {
+    const RECIPIENT = Wallet.createRandom();
+    when('recipient is zero address', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapAdapter,
+          func: 'internalSendToRecipient',
+          args: [token.address, AMOUNT, constants.AddressZero],
+          message: 'ZeroAddress',
+        });
+      });
+    });
+    when('sending ERC20 tokens to the recipient', () => {
+      given(async () => {
+        await swapAdapter.internalSendToRecipient(token.address, AMOUNT, RECIPIENT.address);
+      });
+      then('transfer is executed', async () => {
+        expect(token.transfer).to.have.been.calledOnceWith(RECIPIENT.address, AMOUNT);
+      });
+    });
+    when('sending ETH to the recipient', () => {
+      given(async () => {
+        await wallet.setBalance({ account: swapAdapter.address, balance: BigNumber.from(AMOUNT) });
+        await swapAdapter.internalSendToRecipient(await swapAdapter.PROTOCOL_TOKEN(), AMOUNT, RECIPIENT.address);
+      });
+      then('adapter no longer has balance', async () => {
+        expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(0);
+      });
+      then('balance is transferred to recipient', async () => {
+        expect(await ethers.provider.getBalance(RECIPIENT.address)).to.equal(AMOUNT);
+      });
+    });
+  });
+
   describe('_assertSwapperIsAllowlisted', () => {
     when('swapper is allowlisted', () => {
       given(async () => {

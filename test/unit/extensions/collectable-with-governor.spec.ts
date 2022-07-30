@@ -5,7 +5,7 @@ import { Extensions, Extensions__factory, IERC20 } from '@typechained';
 import { snapshot } from '@utils/evm';
 import { FakeContract, smock } from '@defi-wonderland/smock';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { thenSendDustWasCalledCorrectly } from './assertions';
+import { thenSendToRecipientWasCalledCorrectly } from './assertions';
 import { behaviours } from '@utils';
 
 chai.use(smock.matchers);
@@ -37,7 +37,7 @@ contract('CollectableWithGovernor', () => {
       given(async () => {
         await extensions.connect(governor).sendDust(token.address, AMOUNT, ACCOUNT);
       });
-      thenSendDustWasCalledCorrectly(() => ({
+      thenSendToRecipientWasCalledCorrectly(() => ({
         contract: extensions,
         calls: [{ token: token.address, amount: AMOUNT, recipient: ACCOUNT }],
       }));

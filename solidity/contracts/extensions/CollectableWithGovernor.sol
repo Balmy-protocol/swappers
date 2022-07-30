@@ -2,9 +2,9 @@
 pragma solidity >=0.8.7 <0.9.0;
 
 import '../utils/Governable.sol';
-import './InternalCollectableDust.sol';
+import '../SwapAdapter.sol';
 
-abstract contract CollectableWithGovernor is InternalCollectableDust, Governable {
+abstract contract CollectableWithGovernor is SwapAdapter, Governable {
   /**
    * @notice Sends the given token to the recipient
    * @dev Can only be called by the governor
@@ -17,6 +17,6 @@ abstract contract CollectableWithGovernor is InternalCollectableDust, Governable
     uint256 _amount,
     address _recipient
   ) external onlyGovernor {
-    _sendDust(_token, _amount, _recipient);
+    _sendToRecipient(_token, _amount, _recipient);
   }
 }

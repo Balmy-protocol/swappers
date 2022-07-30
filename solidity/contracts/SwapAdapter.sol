@@ -91,6 +91,25 @@ abstract contract SwapAdapter is ISwapAdapter {
   }
 
   /**
+   * @notice Transfers the given amount of tokens from the contract to the recipient
+   * @param _token The token to check
+   * @param _amount The amount to send
+   * @param _recipient The recipient
+   */
+  function _sendToRecipient(
+    address _token,
+    uint256 _amount,
+    address _recipient
+  ) internal virtual {
+    if (_recipient == address(0)) revert ZeroAddress();
+    if (_token == PROTOCOL_TOKEN) {
+      payable(_recipient).sendValue(_amount);
+    } else {
+      IERC20(_token).safeTransfer(_recipient, _amount);
+    }
+  }
+
+  /**
    * @notice Checks if given swapper is allowlisted, and fails if it isn't
    * @param _swapper The swapper to check
    */
