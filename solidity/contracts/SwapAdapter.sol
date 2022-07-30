@@ -75,7 +75,8 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @param _token The token to check
    * @param _recipient The recipient of the token balance
    */
-  function _sendBalanceToRecipient(address _token, address _recipient) internal virtual {
+  function _sendBalanceOnContractToRecipient(address _token, address _recipient) internal virtual {
+    if (_recipient == address(0)) revert ZeroAddress();
     if (_token == PROTOCOL_TOKEN) {
       uint256 _balance = address(this).balance;
       if (_balance > 0) {

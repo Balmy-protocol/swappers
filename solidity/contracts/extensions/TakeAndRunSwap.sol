@@ -38,7 +38,7 @@ abstract contract TakeAndRunSwap is SwapAdapter {
     }
     _executeSwap(_parameters.swapper, _parameters.swapData, msg.value);
     if (_parameters.checkUnspentTokensIn) {
-      _sendBalanceToRecipient(_parameters.tokenIn, msg.sender);
+      _sendBalanceOnContractToRecipient(_parameters.tokenIn, msg.sender);
     }
   }
 }

@@ -42,7 +42,7 @@ contract Extensions is
     uint256 value;
   }
 
-  struct SendBalanceToRecipientCall {
+  struct SendBalanceOnContractToRecipientCall {
     address token;
     address recipient;
   }
@@ -56,7 +56,7 @@ contract Extensions is
   TakeFromMsgSenderCall[] internal _takeFromMsgSenderCalls;
   MaxApproveSpenderCall[] internal _maxApproveSpenderCalls;
   ExecuteSwapCall[] internal _executeSwapCalls;
-  SendBalanceToRecipientCall[] internal _sendBalanceToRecipientCalls;
+  SendBalanceOnContractToRecipientCall[] internal _sendBalanceOnContractToRecipientCalls;
   RevokeAction[][] internal _revokeCalls;
   SendDustCall[] internal _sendDustCalls;
 
@@ -74,8 +74,8 @@ contract Extensions is
     return _executeSwapCalls;
   }
 
-  function sendBalanceToRecipientCalls() external view returns (SendBalanceToRecipientCall[] memory) {
-    return _sendBalanceToRecipientCalls;
+  function sendBalanceOnContractToRecipientCalls() external view returns (SendBalanceOnContractToRecipientCall[] memory) {
+    return _sendBalanceOnContractToRecipientCalls;
   }
 
   function revokeAllowancesCalls() external view returns (RevokeAction[][] memory) {
@@ -110,9 +110,9 @@ contract Extensions is
     super._executeSwap(_swapper, _swapData, _value);
   }
 
-  function _sendBalanceToRecipient(address _token, address _recipient) internal override {
-    _sendBalanceToRecipientCalls.push(SendBalanceToRecipientCall(_token, _recipient));
-    super._sendBalanceToRecipient(_token, _recipient);
+  function _sendBalanceOnContractToRecipient(address _token, address _recipient) internal override {
+    _sendBalanceOnContractToRecipientCalls.push(SendBalanceOnContractToRecipientCall(_token, _recipient));
+    super._sendBalanceOnContractToRecipient(_token, _recipient);
   }
 
   function internalSendDust(

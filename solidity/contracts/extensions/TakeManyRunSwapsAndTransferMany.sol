@@ -56,7 +56,7 @@ abstract contract TakeManyRunSwapsAndTransferMany is SwapAdapter {
     // Transfer out whatever was left in the contract
     for (uint256 i; i < _parameters.transferOutBalance.length; i++) {
       TransferOutBalance memory _transferOutBalance = _parameters.transferOutBalance[i];
-      _sendBalanceToRecipient(_transferOutBalance.token, _transferOutBalance.recipient);
+      _sendBalanceOnContractToRecipient(_transferOutBalance.token, _transferOutBalance.recipient);
     }
   }
 }
