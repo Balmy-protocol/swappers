@@ -26,7 +26,7 @@ abstract contract TakeAndRunSwap is SwapAdapter {
    * @dev This function can only be executed with swappers that are allowlisted
    * @param _parameters The parameters for the swap
    */
-  function takeAndRunSwap(TakeAndRunSwapParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+  function takeAndRunSwap(TakeAndRunSwapParams calldata _parameters) public payable virtual onlyAllowlisted(_parameters.swapper) {
     if (_parameters.tokenIn != PROTOCOL_TOKEN) {
       _takeFromMsgSender(IERC20(_parameters.tokenIn), _parameters.maxAmountIn);
       _maxApproveSpenderIfNeeded(

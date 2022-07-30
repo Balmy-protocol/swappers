@@ -26,7 +26,7 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
    * @dev This function can only be executed with swappers that are allowlisted
    * @param _parameters The parameters for the swap
    */
-  function takeManyRunSwapAndTransferMany(TakeManyRunSwapAndTransferManyParams calldata _parameters) external payable {
+  function takeManyRunSwapAndTransferMany(TakeManyRunSwapAndTransferManyParams calldata _parameters) public payable virtual {
     for (uint256 i; i < _parameters.takeFromCaller.length; i++) {
       // Take from caller
       TakeFromCaller memory _takeFromCaller = _parameters.takeFromCaller[i];

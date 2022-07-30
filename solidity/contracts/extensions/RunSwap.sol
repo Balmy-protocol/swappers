@@ -25,7 +25,7 @@ abstract contract RunSwap is SwapAdapter {
    * @dev This function can only be executed with swappers that are allowlisted
    * @param _parameters The parameters for the swap
    */
-  function runSwap(RunSwapParams calldata _parameters) external payable onlyAllowlisted(_parameters.swapper) {
+  function runSwap(RunSwapParams calldata _parameters) public payable virtual onlyAllowlisted(_parameters.swapper) {
     if (_parameters.tokenIn == PROTOCOL_TOKEN) {
       _executeSwap(_parameters.swapper, _parameters.swapData, _parameters.amountIn);
     } else {
