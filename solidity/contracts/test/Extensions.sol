@@ -8,7 +8,6 @@ import '../extensions/TakeRunSwapsAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapAndTransferMany.sol';
 import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
 import '../extensions/GetBalances.sol';
-import '../extensions/InternalCollectableDust.sol';
 import '../extensions/RevokableWithGovernor.sol';
 import '../extensions/CollectableWithGovernor.sol';
 
@@ -20,7 +19,6 @@ contract Extensions is
   TakeManyRunSwapAndTransferMany,
   TakeManyRunSwapsAndTransferMany,
   GetBalances,
-  InternalCollectableDust,
   RevokableWithGovernor,
   CollectableWithGovernor
 {
@@ -47,7 +45,7 @@ contract Extensions is
     address recipient;
   }
 
-  struct SendDustCall {
+  struct SendToRecipientCall {
     address token;
     uint256 amount;
     address recipient;
@@ -58,7 +56,7 @@ contract Extensions is
   ExecuteSwapCall[] internal _executeSwapCalls;
   SendBalanceOnContractToRecipientCall[] internal _sendBalanceOnContractToRecipientCalls;
   RevokeAction[][] internal _revokeCalls;
-  SendDustCall[] internal _sendDustCalls;
+  SendToRecipientCall[] internal _sendToRecipientCalls;
 
   constructor(address _swapperRegistry, address _governor) SwapAdapter(_swapperRegistry) Governable(_governor) {}
 
@@ -82,8 +80,8 @@ contract Extensions is
     return _revokeCalls;
   }
 
-  function sendDustCalls() external view returns (SendDustCall[] memory) {
-    return _sendDustCalls;
+  function sendToRecipientCalls() external view returns (SendToRecipientCall[] memory) {
+    return _sendToRecipientCalls;
   }
 
   function _takeFromMsgSender(IERC20 _token, uint256 _amount) internal override {
@@ -115,14 +113,6 @@ contract Extensions is
     super._sendBalanceOnContractToRecipient(_token, _recipient);
   }
 
-  function internalSendDust(
-    address _token,
-    uint256 _amount,
-    address _recipient
-  ) external {
-    _sendDust(_token, _amount, _recipient);
-  }
-
   function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal override {
     _revokeCalls.push();
     uint256 _currentCall = _revokeCalls.length - 1;
@@ -132,12 +122,12 @@ contract Extensions is
     super._revokeAllowances(_revokeActions);
   }
 
-  function _sendDust(
+  function _sendToRecipient(
     address _token,
     uint256 _amount,
     address _recipient
   ) internal override {
-    _sendDustCalls.push(SendDustCall(_token, _amount, _recipient));
-    super._sendDust(_token, _amount, _recipient);
+    _sendToRecipientCalls.push(SendToRecipientCall(_token, _amount, _recipient));
+    super._sendToRecipient(_token, _amount, _recipient);
   }
 }
