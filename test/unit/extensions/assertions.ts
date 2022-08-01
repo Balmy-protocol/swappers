@@ -47,9 +47,9 @@ export function thenExecuteSwapIsCalledCorrectly(
 export function thenSendBalanceToRecipientIsCalledCorrectly(
   args: () => { contract: Extensions; calls: { token: string; recipient: string }[] }
 ) {
-  then('_sendBalanceToRecipient is called correctly', async () => {
+  then('_sendBalanceOnContractToRecipient is called correctly', async () => {
     const { contract, calls: expectedCalls } = args();
-    const calls = await contract.sendBalanceToRecipientCalls();
+    const calls = await contract.sendBalanceOnContractToRecipientCalls();
     for (let i = 0; i < calls.length; i++) {
       expect(calls[i].token).to.equal(expectedCalls[i].token);
       expect(calls[i].recipient).to.equal(expectedCalls[i].recipient);
@@ -58,8 +58,8 @@ export function thenSendBalanceToRecipientIsCalledCorrectly(
 }
 
 export function thenSendBalanceToRecipientIsNotCalled(contract: () => Extensions) {
-  then('_sendBalanceToRecipient is not called', async () => {
-    const calls = await contract().sendBalanceToRecipientCalls();
+  then('_sendBalanceOnContractToRecipient is not called', async () => {
+    const calls = await contract().sendBalanceOnContractToRecipientCalls();
     expect(calls).to.have.lengthOf(0);
   });
 }

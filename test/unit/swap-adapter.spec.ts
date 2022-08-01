@@ -195,12 +195,22 @@ describe('SwapAdapter', () => {
     });
   });
 
-  describe('_sendBalanceToRecipient', () => {
+  describe('_sendBalanceOnContractToRecipient', () => {
+    when('recipient is zero address', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapAdapter,
+          func: 'internalSendBalanceOnContractToRecipient',
+          args: [token.address, constants.AddressZero],
+          message: 'ZeroAddress',
+        });
+      });
+    });
     describe('ERC20', () => {
       when('there is no balance', () => {
         given(async () => {
           token.balanceOf.returns(0);
-          await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+          await swapAdapter.internalSendBalanceOnContractToRecipient(token.address, ACCOUNT);
         });
         then('balance is checked correctly', () => {
           expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
@@ -212,7 +222,7 @@ describe('SwapAdapter', () => {
       when('there is some balance', () => {
         given(async () => {
           token.balanceOf.returns(AMOUNT);
-          await swapAdapter.internalSendBalanceToRecipient(token.address, ACCOUNT);
+          await swapAdapter.internalSendBalanceOnContractToRecipient(token.address, ACCOUNT);
         });
         then('balance is checked correctly', () => {
           expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
@@ -226,7 +236,7 @@ describe('SwapAdapter', () => {
       const RECIPIENT = Wallet.createRandom();
       when('there is no balance', () => {
         given(async () => {
-          await swapAdapter.internalSendBalanceToRecipient(token.address, RECIPIENT.address);
+          await swapAdapter.internalSendBalanceOnContractToRecipient(token.address, RECIPIENT.address);
         });
         then('nothing is sent', async () => {
           expect(await ethers.provider.getBalance(RECIPIENT.address)).to.equal(0);
@@ -236,7 +246,7 @@ describe('SwapAdapter', () => {
         const BALANCE = BigNumber.from(12345);
         given(async () => {
           await wallet.setBalance({ account: swapAdapter.address, balance: BALANCE });
-          await swapAdapter.internalSendBalanceToRecipient('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', RECIPIENT.address);
+          await swapAdapter.internalSendBalanceOnContractToRecipient('0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE', RECIPIENT.address);
         });
         then('adapter no longer has balance', async () => {
           expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(0);
