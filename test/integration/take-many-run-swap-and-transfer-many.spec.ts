@@ -53,6 +53,7 @@ contract('SwapProxy', () => {
             swapper: quote.swapperAddress,
             allowanceTarget: quote.allowanceTarget,
             swapData: quote.data,
+            valueInSwap: AMOUNT_ETH,
             transferOutBalance: [{ token: USDC.address, recipient: recipient.address }],
           },
           { value: AMOUNT_ETH }
@@ -87,6 +88,7 @@ contract('SwapProxy', () => {
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
+          valueInSwap: 0,
           transferOutBalance: [{ token: ETH_ADDRESS, recipient: recipient.address }],
         });
         minAmountOut = quote.minAmountOut;
