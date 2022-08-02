@@ -66,6 +66,7 @@ contract('TakeManyRunSwapAndTransferMany', () => {
           allowanceTarget: swapper.address,
           swapper: swapper.address,
           swapData,
+          valueInSwap: 0,
           transferOutBalance: [
             { token: tokenIn2.address, recipient: ACCOUNT },
             { token: tokenOut1.address, recipient: ACCOUNT },
@@ -114,6 +115,7 @@ contract('TakeManyRunSwapAndTransferMany', () => {
             ],
             allowanceTarget: ACCOUNT,
             swapper: swapper.address,
+            valueInSwap: 12340,
             swapData,
             transferOutBalance: [
               { token: tokenIn2.address, recipient: ACCOUNT },
@@ -126,7 +128,8 @@ contract('TakeManyRunSwapAndTransferMany', () => {
       });
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData, value: 12345 }],
+        // See that even if msg.value is higher, we listen to the set parameter
+        calls: [{ swapper: swapper.address, swapData, value: 12340 }],
       }));
     });
   });
@@ -140,6 +143,7 @@ contract('TakeManyRunSwapAndTransferMany', () => {
         allowanceTarget: ACCOUNT,
         swapper: swapper.address,
         swapData,
+        valueInSwap: 0,
         transferOutBalance: [
           { token: tokenIn2.address, recipient: ACCOUNT },
           { token: tokenOut1.address, recipient: ACCOUNT },
