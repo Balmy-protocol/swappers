@@ -54,6 +54,10 @@ describe('SwapperRegistry', () => {
         const hasRole = await swapperRegistry.hasRole(adminRole, admin.address);
         expect(hasRole).to.be.true;
       });
+      then('super admin role is set as super admin role', async () => {
+        const admin = await swapperRegistry.getRoleAdmin(superAdminRole);
+        expect(admin).to.equal(superAdminRole);
+      });
       then('super admin role is set as admin role', async () => {
         const admin = await swapperRegistry.getRoleAdmin(adminRole);
         expect(admin).to.equal(superAdminRole);
