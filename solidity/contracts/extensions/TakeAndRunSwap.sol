@@ -35,8 +35,10 @@ abstract contract TakeAndRunSwap is SwapAdapter {
         _parameters.swapper == _parameters.allowanceTarget, // If target is a swapper, then it's ok as allowance target
         _parameters.maxAmountIn
       );
+      _executeSwap(_parameters.swapper, _parameters.swapData, 0);
+    } else {
+      _executeSwap(_parameters.swapper, _parameters.swapData, _parameters.maxAmountIn);
     }
-    _executeSwap(_parameters.swapper, _parameters.swapData, msg.value);
     if (_parameters.checkUnspentTokensIn) {
       _sendBalanceOnContractToRecipient(_parameters.tokenIn, msg.sender);
     }

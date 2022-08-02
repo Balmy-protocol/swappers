@@ -104,7 +104,8 @@ contract('TakeAndRunSwap', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData, value: 10 }],
+        // See that even if msg.value is higher than zero, we set the value to 0
+        calls: [{ swapper: swapper.address, swapData, value: 0 }],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
         contract: extensions,
@@ -113,14 +114,17 @@ contract('TakeAndRunSwap', () => {
     });
     when('token in is protocol token', () => {
       given(async () => {
-        await extensions.takeAndRunSwap({
-          swapper: swapper.address,
-          allowanceTarget: ACCOUNT,
-          swapData: swapData,
-          tokenIn: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-          maxAmountIn: 0,
-          checkUnspentTokensIn: false,
-        });
+        await extensions.takeAndRunSwap(
+          {
+            swapper: swapper.address,
+            allowanceTarget: ACCOUNT,
+            swapData: swapData,
+            tokenIn: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            maxAmountIn: 10,
+            checkUnspentTokensIn: false,
+          },
+          { value: 20 }
+        );
       });
       thenTakeFromMsgSenderIsCalledCorrectly(() => ({
         contract: extensions,
@@ -132,7 +136,8 @@ contract('TakeAndRunSwap', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData, value: 0 }],
+        // See that even if msg.value is higher, we listen to the amount in
+        calls: [{ swapper: swapper.address, swapData, value: 10 }],
       }));
       thenSendBalanceToRecipientIsNotCalled(() => extensions);
     });

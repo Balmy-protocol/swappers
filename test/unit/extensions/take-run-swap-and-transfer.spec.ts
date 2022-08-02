@@ -112,7 +112,8 @@ contract('TakeRunSwapAndTransfer', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData, value: 123456 }],
+        // See that even if msg.value is higher than zero, we set the value to 0
+        calls: [{ swapper: swapper.address, swapData, value: 0 }],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
         contract: extensions,
@@ -136,7 +137,7 @@ contract('TakeRunSwapAndTransfer', () => {
             tokenOut: tokenOut.address,
             recipient: ACCOUNT,
           },
-          { value: 123456 }
+          { value: 1234567 }
         );
       });
       thenAllowlistWasCheckedForSwappers(() => ({
@@ -153,7 +154,8 @@ contract('TakeRunSwapAndTransfer', () => {
       }));
       thenExecuteSwapIsCalledCorrectly(() => ({
         contract: extensions,
-        calls: [{ swapper: swapper.address, swapData, value: 123456 }],
+        // See that even if msg.value is higher, we listen to the amount in
+        calls: [{ swapper: swapper.address, swapData, value: AMOUNT }],
       }));
       thenSendBalanceToRecipientIsCalledCorrectly(() => ({
         contract: extensions,
