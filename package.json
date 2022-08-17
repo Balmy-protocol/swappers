@@ -1,6 +1,6 @@
 {
   "name": "@mean-finance/swappers",
-  "version": "1.0.0-rc6",
+  "version": "1.0.0-rc7",
   "description": "Mean Swappers",
   "keywords": [
     "ethereum",
@@ -124,9 +124,6 @@
     "tsconfig-paths": "4.0.0",
     "typechain": "8.0.0",
     "typescript": "4.6.4"
-  },
-  "engines": {
-    "node": "^16.0.0"
   },
   "publishConfig": {
     "access": "public"
