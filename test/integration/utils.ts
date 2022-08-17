@@ -1,16 +1,13 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
 import { evm, wallet } from '@utils';
-import { BigNumber, BigNumberish, constants, utils } from 'ethers';
-import hre, { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { getNodeUrl } from 'utils/env';
-import { setTestChainId } from 'utils/deploy';
+import { BigNumber, BigNumberish, constants } from 'ethers';
+import { deployments, ethers, getNamedAccounts } from 'hardhat';
 import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finance/deterministic-factory/typechained';
 import { QuoteInput, Quote } from './dex-adapters';
 import { abi as IERC20_ABI } from '@openzeppelin/contracts/build/contracts/IERC20.json';
 
 export const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
-const CHAIN = { chain: 'ethereum', chainId: 1 };
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
 const WETH_WHALE_ADDRESS = '0xf04a5cc80b1e94c69b48f5ee68a08cd2f09a7c3e';
 const USDC_ADDRESS = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
@@ -60,7 +57,7 @@ export async function getQuoteAndAllowlistSwapper({
     maxAmountIn = amountIn.add(calculatePercentage(amountIn, slippage));
     minAmountOut = amountOut;
   }
-  const { governor: adminAddress } = await getNamedAccounts();
+  const { msig: adminAddress } = await getNamedAccounts();
   const admin = await wallet.impersonate(adminAddress);
   await ethers.provider.send('hardhat_setBalance', [adminAddress, '0xffffffffffffffff']);
   await registry.connect(admin).allowSwappers([quote.swapperAddress]);
@@ -71,7 +68,7 @@ export async function getQuoteAndAllowlistSwapper({
 }
 
 export async function deployContractsAndReturnSigners() {
-  await fork({ ...CHAIN });
+  await fork({ chain: 'ethereum' });
   await deployments.fixture(['SwapProxy'], { keepExistingDeployments: false });
   const registry = await ethers.getContract<SwapperRegistry>('SwapperRegistry');
   const swapProxy = await ethers.getContract<SwapProxy>('SwapProxy');
@@ -88,24 +85,18 @@ export async function deployContractsAndReturnSigners() {
   return { registry, swapProxy, WETH, USDC, MANA, wethWhale, usdcWhale, manaWhale };
 }
 
-const DETERMINISTIC_FACTORY_ADMIN = '0x1a00e1e311009e56e3b0b9ed6f86f5ce128a1c01';
-const DEPLOYER_ROLE = utils.keccak256(utils.toUtf8Bytes('DEPLOYER_ROLE'));
-export async function fork({ chain, chainId }: { chain: string; chainId: number }): Promise<void> {
-  // Set fork of network
+export async function fork({ chain }: { chain: string }): Promise<void> {
   await evm.reset({
-    jsonRpcUrl: getNodeUrl(chain),
+    network: chain,
   });
-  setTestChainId(chainId);
-  // Give deployer role to our deployer address
-  const admin = await wallet.impersonate(DETERMINISTIC_FACTORY_ADMIN);
-  await wallet.setBalance({ account: admin._address, balance: constants.MaxUint256 });
+  const { eoaAdmin, deployer } = await getNamedAccounts();
+  const deployerAdmin = await wallet.impersonate(eoaAdmin);
+  await wallet.setBalance({ account: deployerAdmin._address, balance: constants.MaxUint256 });
   const deterministicFactory = await ethers.getContractAt<DeterministicFactory>(
     DeterministicFactory__factory.abi,
     '0xbb681d77506df5CA21D2214ab3923b4C056aa3e2'
   );
-  const { deployer: deployerAddress } = await hre.getNamedAccounts();
-  const deployer = await ethers.getSigner(deployerAddress);
-  await deterministicFactory.connect(admin).grantRole(DEPLOYER_ROLE, deployer.address);
+  await deterministicFactory.connect(deployerAdmin).grantRole(await deterministicFactory.DEPLOYER_ROLE(), deployer);
 }
 
 const PRECISION = 10000;
