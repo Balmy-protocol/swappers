@@ -15,7 +15,11 @@ import 'tsconfig-paths/register';
 
 const networks: NetworksUserConfig =
   env.isHardhatCompile() || env.isHardhatClean() || env.isTesting()
-    ? {}
+    ? {
+        hardhat: {
+          allowUnlimitedContractSize: true,
+        },
+      }
     : {
         hardhat: {
           forking: {
