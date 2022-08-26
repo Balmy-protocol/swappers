@@ -44,15 +44,17 @@ abstract contract SwapAdapter is ISwapAdapter {
     bool _alreadyValidatedSpender,
     uint256 _minAllowance
   ) internal virtual {
-    uint256 _allowance = _token.allowance(address(this), _spender);
-    if (_allowance < _minAllowance) {
-      if (!_alreadyValidatedSpender && !SWAPPER_REGISTRY.isValidAllowanceTarget(_spender)) {
-        revert InvalidAllowanceTarget(_spender);
+    if (_spender != address(0)) {
+      uint256 _allowance = _token.allowance(address(this), _spender);
+      if (_allowance < _minAllowance) {
+        if (!_alreadyValidatedSpender && !SWAPPER_REGISTRY.isValidAllowanceTarget(_spender)) {
+          revert InvalidAllowanceTarget(_spender);
+        }
+        if (_allowance > 0) {
+          _token.approve(_spender, 0); // We do this because some tokens (like USDT) fail if we don't
+        }
+        _token.approve(_spender, type(uint256).max);
       }
-      if (_allowance > 0) {
-        _token.approve(_spender, 0); // We do this because some tokens (like USDT) fail if we don't
-      }
-      _token.approve(_spender, type(uint256).max);
     }
   }
 
