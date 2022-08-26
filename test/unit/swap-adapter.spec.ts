@@ -91,6 +91,20 @@ describe('SwapAdapter', () => {
   });
 
   describe('_maxApproveSpenderIfNeeded', () => {
+    when('spender is the zero address', () => {
+      given(async () => {
+        await swapAdapter.internalMaxApproveSpenderIfNeeded(token.address, constants.AddressZero, false, AMOUNT);
+      });
+      then('allowance is not checked', () => {
+        expect(token.allowance).to.not.have.been.called;
+      });
+      then('registry is not called', async () => {
+        expect(registry.isValidAllowanceTarget).to.not.have.been.called;
+      });
+      then('approve is not called', async () => {
+        expect(token.approve).to.not.have.been.called;
+      });
+    });
     when('current allowance is enough', () => {
       given(async () => {
         token.allowance.returns(AMOUNT);
