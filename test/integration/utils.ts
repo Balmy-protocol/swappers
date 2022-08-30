@@ -3,7 +3,7 @@ import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
 import { evm, wallet } from '@utils';
 import { BigNumber, BigNumberish, constants } from 'ethers';
 import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finance/deterministic-factory/typechained';
+import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finance/deterministic-factory';
 import { QuoteInput, Quote } from './dex-adapters';
 import { abi as IERC20_ABI } from '@openzeppelin/contracts/build/contracts/IERC20.json';
 

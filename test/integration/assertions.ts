@@ -1,4 +1,4 @@
-import { IERC20 } from '@mean-finance/deterministic-factory/typechained';
+import { IERC20 } from '@mean-finance/deterministic-factory';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { ethers } from 'hardhat';
