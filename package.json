@@ -1,6 +1,6 @@
 {
   "name": "@mean-finance/swappers",
-  "version": "1.0.0-rc12",
+  "version": "1.0.0-rc13",
   "description": "Mean Swappers",
   "keywords": [
     "ethereum",
@@ -33,9 +33,8 @@
     "artifacts/solidity/**/*.json",
     "!artifacts/solidity/contracts/test/**",
     "!artifacts/solidity/**/**/*.dbg.json",
-    "typechained",
-    "!typechained/**/*test*",
-    "!typechained/**/*Mock*",
+    "!/**/*test*",
+    "!/**/*Mock*",
     "deployments",
     "!deployments/localhost",
     "deploy",
@@ -53,7 +52,7 @@
     "lint:check": "cross-env solhint 'contracts/**/*.sol' 'interfaces/**/*.sol' && cross-env prettier --check './**'",
     "lint:fix": "sort-package-json && cross-env prettier --write './**' && cross-env solhint --fix 'contracts/**/*.sol' 'interfaces/**/*.sol'",
     "prepare": "husky install",
-    "prepublishOnly": "hardhat clean && PUBLISHING_NPM=true hardhat compile && pinst --disable",
+    "prepublishOnly": "hardhat clean && PUBLISHING_NPM=true hardhat compile && yarn transpile && pinst --disable",
     "postpublish": "pinst --enable",
     "release": "standard-version",
     "test": "yarn compile:test && cross-env TEST=true mocha",
@@ -61,7 +60,8 @@
     "test:e2e": "yarn test './test/e2e/**/*.spec.ts'",
     "test:gas": "cross-env REPORT_GAS=1 npx hardhat test",
     "test:integration": "yarn test './test/integration/**/*.spec.ts'",
-    "test:unit": "yarn test 'test/unit/**/*.spec.ts'"
+    "test:unit": "yarn test 'test/unit/**/*.spec.ts'",
+    "transpile": "rm -rf dist && npx tsc -p tsconfig.publish.json"
   },
   "lint-staged": {
     "*.{js,css,md,ts,sol,json}": "prettier --write",
