@@ -3,11 +3,12 @@ import { given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, ContractTransaction, utils } from 'ethers';
 import { snapshot } from '@utils/evm';
 import { expectBalanceToBeEmpty, expectBalanceToBeGreatherThan } from './assertions';
 import { deployContractsAndReturnSigners, getQuoteAndAllowlistSwapper } from './utils';
 import { oneInchAdapter, paraswapAdapter, Quote, QuoteInput, zrxAdapter } from './dex-adapters';
+import { GasSnapshotReporter } from '@mean-finance/web3-utilities';
 
 const AMOUNT_EXACT_IN = utils.parseEther('1');
 const AMOUNT_EXACT_OUT = utils.parseUnits('1000', 6);
@@ -74,6 +75,7 @@ describe('DEX Aggregators - Integration', () => {
   }) {
     describe(swapper + ' (' + type + ')', () => {
       let minAmountOut: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -88,7 +90,7 @@ describe('DEX Aggregators - Integration', () => {
         minAmountOut = quote.minAmountOut;
         await WETH.connect(wethWhale).transfer(caller.address, quote.maxAmountIn);
         await WETH.connect(caller).approve(swapProxy.address, quote.maxAmountIn);
-        await swapProxy.connect(caller).takeRunSwapAndTransfer({
+        tx = await swapProxy.connect(caller).takeRunSwapAndTransfer({
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
@@ -109,6 +111,12 @@ describe('DEX Aggregators - Integration', () => {
         then(`proxy has no 'to' token left`, () => expectBalanceToBeEmpty(USDC, swapProxy));
         then(`recipient has no 'from' token`, () => expectBalanceToBeEmpty(WETH, recipient));
         then(`recipient has the expected amount of 'to' token`, () => expectBalanceToBeGreatherThan(USDC, minAmountOut, recipient));
+        then(`gas snapshot`, async () => {
+          await GasSnapshotReporter.snapshot(
+            `${swapper} swap and transfer while ${!checkUnspentTokensIn ? 'not' : ''} checking unspent tokens`,
+            tx
+          );
+        });
       });
     });
   }

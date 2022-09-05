@@ -3,11 +3,12 @@ import { contract, given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, ContractTransaction, utils } from 'ethers';
 import { snapshot } from '@utils/evm';
 import { deployContractsAndReturnSigners, ETH_ADDRESS, getQuoteAndAllowlistSwapper } from './utils';
 import { expectBalanceToBeEmpty, expectBalanceToBeGreatherThan, expectETHBalanceToBeEmpty } from './assertions';
 import { paraswapAdapter } from './dex-adapters';
+import { GasSnapshotReporter } from '@mean-finance/web3-utilities';
 
 contract('SwapProxy', () => {
   let registry: SwapperRegistry;
@@ -30,6 +31,7 @@ contract('SwapProxy', () => {
   describe('takeAndRunSwap', () => {
     when('executing ETH => ERC20', () => {
       let minAmountOut: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -41,7 +43,7 @@ contract('SwapProxy', () => {
           recipient: recipient,
           quoter: paraswapAdapter,
         });
-        await swapProxy.connect(caller).takeAndRunSwap(
+        tx = await swapProxy.connect(caller).takeAndRunSwap(
           {
             swapper: quote.swapperAddress,
             allowanceTarget: quote.allowanceTarget,
@@ -58,10 +60,14 @@ contract('SwapProxy', () => {
       then(`proxy has no 'from' token left`, () => expectETHBalanceToBeEmpty(swapProxy));
       then(`proxy has no 'to' token left`, () => expectBalanceToBeEmpty(USDC, swapProxy));
       then(`recipient has the expected amount of 'to' token`, () => expectBalanceToBeGreatherThan(USDC, minAmountOut, recipient));
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`Taking ETH and swapping for ERC20`, tx);
+      });
     });
 
     when('executing ERC20 => ERC20', () => {
       let minAmountOut: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -75,7 +81,7 @@ contract('SwapProxy', () => {
         });
         await WETH.connect(wethWhale).transfer(caller.address, quote.maxAmountIn);
         await WETH.connect(caller).approve(swapProxy.address, quote.maxAmountIn);
-        await swapProxy.connect(caller).takeAndRunSwap({
+        tx = await swapProxy.connect(caller).takeAndRunSwap({
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
@@ -91,6 +97,9 @@ contract('SwapProxy', () => {
       then(`proxy has no 'to' token left`, () => expectBalanceToBeEmpty(USDC, swapProxy));
       then(`recipient has no 'from' token`, () => expectBalanceToBeEmpty(WETH, recipient));
       then(`recipient has the expected amount of 'to' token`, () => expectBalanceToBeGreatherThan(USDC, minAmountOut, recipient));
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`Taking only ETH and swapping for ERC20`, tx);
+      });
     });
   });
 });
