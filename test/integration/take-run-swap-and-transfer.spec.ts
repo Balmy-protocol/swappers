@@ -3,7 +3,7 @@ import { contract, given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, ContractTransaction, utils } from 'ethers';
 import { snapshot } from '@utils/evm';
 import { deployContractsAndReturnSigners, ETH_ADDRESS, getQuoteAndAllowlistSwapper } from './utils';
 import {
@@ -13,6 +13,7 @@ import {
   expectETHBalanceToBeGreatherThan,
 } from './assertions';
 import { paraswapAdapter } from './dex-adapters';
+import { GasSnapshotReporter } from '@mean-finance/web3-utilities';
 
 contract('SwapProxy', () => {
   let registry: SwapperRegistry;
@@ -35,6 +36,7 @@ contract('SwapProxy', () => {
   describe('takeRunSwapAndTransfer', () => {
     when('swapping ETH => ERC20', () => {
       let minAmountOut: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -45,7 +47,7 @@ contract('SwapProxy', () => {
           amount: utils.parseEther('0.5'),
           quoter: paraswapAdapter,
         });
-        await swapProxy.connect(caller).takeRunSwapAndTransfer(
+        tx = await swapProxy.connect(caller).takeRunSwapAndTransfer(
           {
             swapper: quote.swapperAddress,
             allowanceTarget: quote.allowanceTarget,
@@ -64,11 +66,15 @@ contract('SwapProxy', () => {
       then(`proxy has no 'from' token left`, () => expectETHBalanceToBeEmpty(swapProxy));
       then(`proxy has no 'to' token left`, () => expectBalanceToBeEmpty(USDC, swapProxy));
       then(`recipient has the expected amount of 'to' token`, () => expectBalanceToBeGreatherThan(USDC, minAmountOut, recipient));
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`Taking ETH, swapping it for USDC and transfering the it`, tx);
+      });
     });
 
     when('swapping ERC20 => ETH', () => {
       let minAmountOut: BigNumber;
       let initialRecipientEthBalance: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         initialRecipientEthBalance = await ethers.provider.getBalance(recipient.address);
         const quote = await getQuoteAndAllowlistSwapper({
@@ -82,7 +88,7 @@ contract('SwapProxy', () => {
         });
         await USDC.connect(usdcWhale).transfer(caller.address, quote.maxAmountIn);
         await USDC.connect(caller).approve(swapProxy.address, quote.maxAmountIn);
-        await swapProxy.connect(caller).takeRunSwapAndTransfer({
+        tx = await swapProxy.connect(caller).takeRunSwapAndTransfer({
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
@@ -101,10 +107,14 @@ contract('SwapProxy', () => {
       then(`recipient has the expected amount of 'to' token`, () =>
         expectETHBalanceToBeGreatherThan(initialRecipientEthBalance.add(minAmountOut), recipient)
       );
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`Taking USDC, swapping it for ETH and transfering the it`, tx);
+      });
     });
 
     when('swapping ERC20 => ERC20', () => {
       let minAmountOut: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quote = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -117,7 +127,7 @@ contract('SwapProxy', () => {
         });
         await WETH.connect(wethWhale).transfer(caller.address, quote.maxAmountIn);
         await WETH.connect(caller).approve(swapProxy.address, quote.maxAmountIn);
-        await swapProxy.connect(caller).takeRunSwapAndTransfer({
+        tx = await swapProxy.connect(caller).takeRunSwapAndTransfer({
           swapper: quote.swapperAddress,
           allowanceTarget: quote.allowanceTarget,
           swapData: quote.data,
@@ -135,6 +145,9 @@ contract('SwapProxy', () => {
       then(`proxy has no 'to' token left`, () => expectBalanceToBeEmpty(USDC, swapProxy));
       then(`recipient has no 'from' token`, () => expectBalanceToBeEmpty(WETH, recipient));
       then(`recipient has the expected amount of 'to' token`, () => expectBalanceToBeGreatherThan(USDC, minAmountOut, recipient));
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`Taking WETH, swapping it for USDC and transferring it`, tx);
+      });
     });
   });
 });

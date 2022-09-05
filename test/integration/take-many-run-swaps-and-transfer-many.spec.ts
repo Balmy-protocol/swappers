@@ -3,7 +3,7 @@ import { contract, given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, ContractTransaction, utils } from 'ethers';
 import { snapshot } from '@utils/evm';
 import { deployContractsAndReturnSigners, ETH_ADDRESS, getQuoteAndAllowlistSwapper } from './utils';
 import {
@@ -13,6 +13,7 @@ import {
   expectETHBalanceToBeGreatherThan,
 } from './assertions';
 import { paraswapAdapter, zrxAdapter } from './dex-adapters';
+import { GasSnapshotReporter } from '@mean-finance/web3-utilities';
 
 contract('SwapProxy', () => {
   let registry: SwapperRegistry;
@@ -38,6 +39,7 @@ contract('SwapProxy', () => {
       const AMOUNT_USDC = utils.parseUnits('1000', 6);
       let minAmountOutETHToUSDC: BigNumber, minAmountOutWETHToUSDC: BigNumber, minAmountOutUSDCToETH: BigNumber;
       let initialRecipientEthBalance: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quoteETHToUSDC = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -71,7 +73,7 @@ contract('SwapProxy', () => {
         await WETH.connect(wethWhale).transfer(caller.address, quoteWETHToUSDC.maxAmountIn);
         await USDC.connect(caller).approve(swapProxy.address, quoteUSDCToETH.maxAmountIn);
         await WETH.connect(caller).approve(swapProxy.address, quoteWETHToUSDC.maxAmountIn);
-        await swapProxy.connect(caller).takeManyRunSwapsAndTransferMany(
+        tx = await swapProxy.connect(caller).takeManyRunSwapsAndTransferMany(
           {
             takeFromCaller: [
               { token: USDC.address, amount: AMOUNT_USDC },
@@ -110,6 +112,9 @@ contract('SwapProxy', () => {
       then('recipient has the expected amount of ETH', () =>
         expectETHBalanceToBeGreatherThan(initialRecipientEthBalance.add(minAmountOutUSDCToETH), recipient)
       );
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`swapping [ETH => ERC20, ERC20 => ETH, ERC20 => ERC20]`, tx);
+      });
     });
   });
 });

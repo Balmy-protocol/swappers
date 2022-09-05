@@ -3,7 +3,7 @@ import { contract, given, then, when } from '@utils/bdd';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { IERC20, SwapperRegistry, SwapProxy } from '@typechained';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, ContractTransaction, utils } from 'ethers';
 import { snapshot } from '@utils/evm';
 import { deployContractsAndReturnSigners, ETH_ADDRESS, getQuoteAndAllowlistSwapper } from './utils';
 import {
@@ -14,6 +14,7 @@ import {
 } from './assertions';
 import { paraswapAdapter, zrxAdapter } from './dex-adapters';
 import { expect } from 'chai';
+import { GasSnapshotReporter } from '@mean-finance/web3-utilities';
 
 contract('SwapProxy', () => {
   let registry: SwapperRegistry;
@@ -37,6 +38,7 @@ contract('SwapProxy', () => {
     when('swapping ETH => [USDC, MANA]', () => {
       const AMOUNT_ETH_PER_SWAP = utils.parseEther('0.5');
       let minAmountOutETHToUSDC: BigNumber, minAmountOutETHToMANA: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quoteETHToUSDC = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -56,7 +58,7 @@ contract('SwapProxy', () => {
           amount: AMOUNT_ETH_PER_SWAP,
           quoter: zrxAdapter,
         });
-        await swapProxy.connect(caller).takeRunSwapsAndTransferMany(
+        tx = await swapProxy.connect(caller).takeRunSwapsAndTransferMany(
           {
             tokenIn: ETH_ADDRESS,
             maxAmountIn: 0,
@@ -84,11 +86,15 @@ contract('SwapProxy', () => {
       then('proxy has no ETH left', () => expectETHBalanceToBeEmpty(swapProxy));
       then('recipient has the expected amount of USDC', () => expectBalanceToBeGreatherThan(USDC, minAmountOutETHToUSDC, recipient));
       then('recipient has the expected amount of MANA', () => expectBalanceToBeGreatherThan(MANA, minAmountOutETHToMANA, recipient));
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`swapping ETH => [USDC, MANA]`, tx);
+      });
     });
     when('swapping USDC => MANA => ETH', () => {
       const AMOUNT_MANA = utils.parseEther('1000');
       let minAmountOut: BigNumber;
       let initialRecipientEthBalance: BigNumber;
+      let tx: ContractTransaction;
       given(async () => {
         const quoteUSDCToMANA = await getQuoteAndAllowlistSwapper({
           swapProxy,
@@ -111,7 +117,7 @@ contract('SwapProxy', () => {
         initialRecipientEthBalance = await ethers.provider.getBalance(recipient.address);
         await USDC.connect(usdcWhale).transfer(caller.address, quoteUSDCToMANA.maxAmountIn);
         await USDC.connect(caller).approve(swapProxy.address, quoteUSDCToMANA.maxAmountIn);
-        await swapProxy.connect(caller).takeRunSwapsAndTransferMany({
+        tx = await swapProxy.connect(caller).takeRunSwapsAndTransferMany({
           tokenIn: USDC.address,
           maxAmountIn: quoteUSDCToMANA.maxAmountIn,
           allowanceTargets: [
@@ -143,6 +149,9 @@ contract('SwapProxy', () => {
       then('recipient has the expected amount of ETH', () =>
         expectETHBalanceToBeGreatherThan(initialRecipientEthBalance.add(minAmountOut), recipient)
       );
+      then(`gas snapshot`, async () => {
+        await GasSnapshotReporter.snapshot(`swapping USDC => MANA => ETH`, tx);
+      });
     });
   });
 });

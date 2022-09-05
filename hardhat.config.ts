@@ -87,9 +87,6 @@ const config: HardhatUserConfig = {
       arbitrum: '0x84F4836e8022765Af9FBCE3Bb2887fD826c668f1',
     },
   },
-  mocha: {
-    timeout: process.env.MOCHA_TIMEOUT || 300000,
-  },
   networks,
   solidity: {
     compilers: [
@@ -138,9 +135,11 @@ const config: HardhatUserConfig = {
 };
 
 if (process.env.TEST) {
-  (config.solidity as MultiSolcUserConfig).compilers = (config.solidity as MultiSolcUserConfig).compilers.map((compiler) => {
-    return {
-      ...compiler,
+  // Set storage layout for smock
+  const solidity = config.solidity as MultiSolcUserConfig;
+  solidity.compilers.forEach((_, i) => {
+    solidity.compilers[i].settings! = {
+      ...solidity.compilers[i].settings!,
       outputSelection: {
         '*': {
           '*': ['storageLayout'],
@@ -148,6 +147,7 @@ if (process.env.TEST) {
       },
     };
   });
+  config.solidity = solidity;
 }
 
 export default config;

@@ -1,0 +1,17 @@
+Ethereum price: $1574.08
+Gas price: 6.219607329 gwei
+0x swap and transfer while not checking unspent tokens: 178488 - $1.75 
+0x swap and transfer while not checking unspent tokens: 178517 - $1.75 
+1inch swap and transfer while not checking unspent tokens: 207739 - $2.03 
+Paraswap swap and transfer while not checking unspent tokens: 256107 - $2.51 
+Paraswap swap and transfer while  checking unspent tokens: 266241 - $2.61 
+Taking ETH and swapping for ERC20: 183050 - $1.79 
+Taking only ETH and swapping for ERC20: 226748 - $2.22 
+Taking many, run swap ETH for ERC20 and transfer many: 171567 - $1.68 
+Taking many, run swap ERC20 for ETH and transfer many: 282555 - $2.77 
+swapping [ETH => ERC20, ERC20 => ETH, ERC20 => ERC20]: 422874 - $4.14 
+Taking ETH, swapping it for USDC and transfering the it: 170794 - $1.67 
+Taking USDC, swapping it for ETH and transfering the it: 260656 - $2.55 
+Taking WETH, swapping it for USDC and transferring it: 201568 - $1.97 
+swapping ETH => [USDC, MANA]: 303118 - $2.97 
+swapping USDC => MANA => ETH: 399220 - $3.91 
