@@ -6,6 +6,7 @@ import { deployments, ethers, getNamedAccounts } from 'hardhat';
 import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finance/deterministic-factory';
 import { QuoteInput, Quote } from './dex-adapters';
 import { abi as IERC20_ABI } from '@openzeppelin/contracts/build/contracts/IERC20.json';
+import { abi as IERC20_PERMIT_ABI } from '@openzeppelin/contracts/build/contracts/IERC20Permit.json';
 
 export const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 const WETH_ADDRESS = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
@@ -73,7 +74,7 @@ export async function deployContractsAndReturnSigners() {
   const registry = await ethers.getContract<SwapperRegistry>('SwapperRegistry');
   const swapProxy = await ethers.getContract<SwapProxy>('SwapProxy');
   const WETH = await ethers.getContractAt<IERC20>(IERC20_ABI, WETH_ADDRESS);
-  const USDC = await ethers.getContractAt<IERC20>(IERC20_ABI, USDC_ADDRESS);
+  const USDC = await ethers.getContractAt<IERC20>([...IERC20_ABI, ...IERC20_PERMIT_ABI], USDC_ADDRESS);
   const MANA = await ethers.getContractAt<IERC20>(IERC20_ABI, MANA_ADDRESS);
 
   const wethWhale = await wallet.impersonate(WETH_WHALE_ADDRESS);
