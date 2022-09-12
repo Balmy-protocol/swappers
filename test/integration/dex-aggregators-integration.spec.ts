@@ -13,7 +13,7 @@ import { oneInchAdapter, paraswapAdapter, Quote, QuoteInput, zrxAdapter } from '
 const AMOUNT_EXACT_OUT = utils.parseEther('1');
 const AMOUNT_EXACT_IN = utils.parseUnits('1000', 6);
 
-describe.only('DEX Aggregators - Integration', () => {
+describe('DEX Aggregators - Integration', () => {
   let registry: SwapperRegistry;
   let swapProxy: SwapProxy;
   let WETH: IERC20, USDC: IERC20;
