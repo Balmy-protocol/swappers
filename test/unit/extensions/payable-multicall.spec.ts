@@ -7,7 +7,7 @@ import { snapshot } from '@utils/evm';
 import { PayableMulticallMock, PayableMulticallMock__factory } from '@typechained';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-describe.only('Multicall', function () {
+describe('Multicall', function () {
   let signer: SignerWithAddress;
   let recipient1: SignerWithAddress, recipient2: SignerWithAddress, recipient3: SignerWithAddress;
   let multicall: PayableMulticallMock;
