@@ -210,16 +210,6 @@ describe('SwapAdapter', () => {
   });
 
   describe('_sendBalanceOnContractToRecipient', () => {
-    when('recipient is zero address', () => {
-      then('reverts with message', async () => {
-        await behaviours.txShouldRevertWithMessage({
-          contract: swapAdapter,
-          func: 'internalSendBalanceOnContractToRecipient',
-          args: [token.address, constants.AddressZero],
-          message: 'ZeroAddress',
-        });
-      });
-    });
     describe('ERC20', () => {
       when('there is no balance', () => {
         given(async () => {
@@ -243,6 +233,18 @@ describe('SwapAdapter', () => {
         });
         then('transfer is executed', async () => {
           expect(token.transfer).to.have.been.calledOnceWith(ACCOUNT, AMOUNT);
+        });
+      });
+      when('recipient is zero address', () => {
+        given(async () => {
+          token.balanceOf.returns(AMOUNT);
+          await swapAdapter.internalSendBalanceOnContractToRecipient(token.address, constants.AddressZero);
+        });
+        then('balance is checked correctly', () => {
+          expect(token.balanceOf).to.have.been.calledOnceWith(swapAdapter.address);
+        });
+        then('balance is transferred to the caller', async () => {
+          expect(token.transfer).to.have.been.calledOnceWith(caller.address, AMOUNT);
         });
       });
     });
@@ -269,27 +271,45 @@ describe('SwapAdapter', () => {
           expect(await ethers.provider.getBalance(RECIPIENT.address)).to.equal(BALANCE);
         });
       });
+      when('recipient is zero address', () => {
+        const BALANCE = BigNumber.from(12345);
+        let gasSpent: BigNumber, initialBalance: BigNumber;
+        given(async () => {
+          initialBalance = await ethers.provider.getBalance(caller.address);
+          await wallet.setBalance({ account: swapAdapter.address, balance: BALANCE });
+          const tx = await swapAdapter.internalSendBalanceOnContractToRecipient(
+            '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+            constants.AddressZero
+          );
+          const receipt = await tx.wait();
+          gasSpent = receipt.gasUsed.mul(receipt.effectiveGasPrice);
+        });
+        then('adapter no longer has balance', async () => {
+          expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(0);
+        });
+        then('balance is transferred to the caller', async () => {
+          expect(await ethers.provider.getBalance(caller.address)).to.equal(initialBalance.sub(gasSpent).add(BALANCE));
+        });
+      });
     });
   });
 
   describe('_sendToRecipient', () => {
     const RECIPIENT = Wallet.createRandom();
-    when('recipient is zero address', () => {
-      then('reverts with message', async () => {
-        await behaviours.txShouldRevertWithMessage({
-          contract: swapAdapter,
-          func: 'internalSendToRecipient',
-          args: [token.address, AMOUNT, constants.AddressZero],
-          message: 'ZeroAddress',
-        });
-      });
-    });
     when('sending ERC20 tokens to the recipient', () => {
       given(async () => {
         await swapAdapter.internalSendToRecipient(token.address, AMOUNT, RECIPIENT.address);
       });
       then('transfer is executed', async () => {
         expect(token.transfer).to.have.been.calledOnceWith(RECIPIENT.address, AMOUNT);
+      });
+    });
+    when('sending ERC20 tokens to the zero address', () => {
+      given(async () => {
+        await swapAdapter.internalSendToRecipient(token.address, AMOUNT, constants.AddressZero);
+      });
+      then('amount is transferred to the caller', async () => {
+        expect(token.transfer).to.have.been.calledOnceWith(caller.address, AMOUNT);
       });
     });
     when('sending ETH to the recipient', () => {
@@ -300,8 +320,24 @@ describe('SwapAdapter', () => {
       then('adapter no longer has balance', async () => {
         expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(0);
       });
-      then('balance is transferred to recipient', async () => {
+      then('amount is transferred to recipient', async () => {
         expect(await ethers.provider.getBalance(RECIPIENT.address)).to.equal(AMOUNT);
+      });
+    });
+    when('sending ETH to the zero address', () => {
+      let gasSpent: BigNumber, initialBalance: BigNumber;
+      given(async () => {
+        initialBalance = await ethers.provider.getBalance(caller.address);
+        await wallet.setBalance({ account: swapAdapter.address, balance: BigNumber.from(AMOUNT) });
+        const tx = await swapAdapter.internalSendToRecipient(await swapAdapter.PROTOCOL_TOKEN(), AMOUNT, constants.AddressZero);
+        const receipt = await tx.wait();
+        gasSpent = receipt.gasUsed.mul(receipt.effectiveGasPrice);
+      });
+      then('adapter no longer has balance', async () => {
+        expect(await ethers.provider.getBalance(swapAdapter.address)).to.equal(0);
+      });
+      then('amount is transferred to the caller', async () => {
+        expect(await ethers.provider.getBalance(caller.address)).to.equal(initialBalance.sub(gasSpent).add(AMOUNT));
       });
     });
   });
