@@ -10,6 +10,7 @@ import '../extensions/TakeManyRunSwapsAndTransferMany.sol';
 import '../extensions/GetBalances.sol';
 import '../extensions/RevokableWithGovernor.sol';
 import '../extensions/CollectableWithGovernor.sol';
+import '../extensions/TokenPermit.sol';
 
 contract Extensions is
   RunSwap,
@@ -20,7 +21,8 @@ contract Extensions is
   TakeManyRunSwapsAndTransferMany,
   GetBalances,
   RevokableWithGovernor,
-  CollectableWithGovernor
+  CollectableWithGovernor,
+  TokenPermit
 {
   struct TakeFromMsgSenderCall {
     IERC20 token;
