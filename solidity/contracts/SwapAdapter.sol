@@ -78,7 +78,7 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @param _recipient The recipient of the token balance
    */
   function _sendBalanceOnContractToRecipient(address _token, address _recipient) internal virtual {
-    if (_recipient == address(0)) revert ZeroAddress();
+    if (_recipient == address(0)) _recipient = msg.sender;
     if (_token == PROTOCOL_TOKEN) {
       uint256 _balance = address(this).balance;
       if (_balance > 0) {
@@ -103,7 +103,7 @@ abstract contract SwapAdapter is ISwapAdapter {
     uint256 _amount,
     address _recipient
   ) internal virtual {
-    if (_recipient == address(0)) revert ZeroAddress();
+    if (_recipient == address(0)) _recipient = msg.sender;
     if (_token == PROTOCOL_TOKEN) {
       payable(_recipient).sendValue(_amount);
     } else {
