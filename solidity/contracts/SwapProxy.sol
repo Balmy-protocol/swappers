@@ -9,6 +9,8 @@ import './extensions/TakeManyRunSwapsAndTransferMany.sol';
 import './extensions/CollectableWithGovernor.sol';
 import './extensions/RevokableWithGovernor.sol';
 import './extensions/GetBalances.sol';
+import './extensions/TokenPermit.sol';
+import './extensions/PayableMulticall.sol';
 
 /**
  * @notice This contract implements all swap extensions, so it can be used by EOAs or other contracts that do not have the extensions
@@ -21,7 +23,9 @@ contract SwapProxy is
   TakeManyRunSwapsAndTransferMany,
   CollectableWithGovernor,
   RevokableWithGovernor,
-  GetBalances
+  GetBalances,
+  TokenPermit,
+  PayableMulticall
 {
   constructor(address _swapperRegistry, address _governor) SwapAdapter(_swapperRegistry) Governable(_governor) {}
 }
