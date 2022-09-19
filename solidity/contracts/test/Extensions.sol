@@ -118,8 +118,11 @@ contract Extensions is
   function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal override {
     _revokeCalls.push();
     uint256 _currentCall = _revokeCalls.length - 1;
-    for (uint256 i; i < _revokeActions.length; i++) {
+    for (uint256 i = 0; i < _revokeActions.length; ) {
       _revokeCalls[_currentCall].push(_revokeActions[i]);
+      unchecked {
+        i++;
+      }
     }
     super._revokeAllowances(_revokeActions);
   }

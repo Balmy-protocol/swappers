@@ -29,7 +29,7 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
    * @param _parameters The parameters for the swap
    */
   function takeManyRunSwapAndTransferMany(TakeManyRunSwapAndTransferManyParams calldata _parameters) public payable virtual {
-    for (uint256 i; i < _parameters.takeFromCaller.length; i++) {
+    for (uint256 i = 0; i < _parameters.takeFromCaller.length; ) {
       // Take from caller
       TakeFromCaller memory _takeFromCaller = _parameters.takeFromCaller[i];
       _takeFromMsgSender(_takeFromCaller.token, _takeFromCaller.amount);
@@ -41,6 +41,9 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
         _parameters.allowanceTarget == _parameters.swapper,
         _takeFromCaller.amount
       );
+      unchecked {
+        i++;
+      }
     }
 
     // Validate that the swapper is allowlisted
@@ -50,9 +53,12 @@ abstract contract TakeManyRunSwapAndTransferMany is SwapAdapter {
     _executeSwap(_parameters.swapper, _parameters.swapData, _parameters.valueInSwap);
 
     // Transfer out whatever was left in the contract
-    for (uint256 i; i < _parameters.transferOutBalance.length; i++) {
+    for (uint256 i = 0; i < _parameters.transferOutBalance.length; ) {
       TransferOutBalance memory _transferOutBalance = _parameters.transferOutBalance[i];
       _sendBalanceOnContractToRecipient(_transferOutBalance.token, _transferOutBalance.recipient);
+      unchecked {
+        i++;
+      }
     }
   }
 }

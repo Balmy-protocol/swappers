@@ -27,20 +27,29 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
     _setRoleAdmin(SUPER_ADMIN_ROLE, SUPER_ADMIN_ROLE);
     _setRoleAdmin(ADMIN_ROLE, SUPER_ADMIN_ROLE);
     _setupRole(SUPER_ADMIN_ROLE, _superAdmin);
-    for (uint256 i; i < _initialAdmins.length; i++) {
+    for (uint256 i = 0; i < _initialAdmins.length; ) {
       _setupRole(ADMIN_ROLE, _initialAdmins[i]);
+      unchecked {
+        i++;
+      }
     }
 
     if (_initialSupplementaryAllowanceTargets.length > 0) {
-      for (uint256 i; i < _initialSupplementaryAllowanceTargets.length; i++) {
+      for (uint256 i = 0; i < _initialSupplementaryAllowanceTargets.length; ) {
         _accountRole[_initialSupplementaryAllowanceTargets[i]] = Role.SUPPLEMENTARY_ALLOWANCE_TARGET;
+        unchecked {
+          i++;
+        }
       }
       emit AllowedSupplementaryAllowanceTargets(_initialSupplementaryAllowanceTargets);
     }
 
     if (_initialSwappersAllowlisted.length > 0) {
-      for (uint256 i; i < _initialSwappersAllowlisted.length; i++) {
+      for (uint256 i = 0; i < _initialSwappersAllowlisted.length; ) {
         _accountRole[_initialSwappersAllowlisted[i]] = Role.SWAPPER;
+        unchecked {
+          i++;
+        }
       }
       emit AllowedSwappers(_initialSwappersAllowlisted);
     }
@@ -58,32 +67,44 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
 
   /// @inheritdoc ISwapperRegistry
   function allowSwappers(address[] calldata _swappers) external onlyRole(ADMIN_ROLE) {
-    for (uint256 i; i < _swappers.length; i++) {
+    for (uint256 i = 0; i < _swappers.length; ) {
       _accountRole[_swappers[i]] = Role.SWAPPER;
+      unchecked {
+        i++;
+      }
     }
     emit AllowedSwappers(_swappers);
   }
 
   /// @inheritdoc ISwapperRegistry
   function removeSwappersFromAllowlist(address[] calldata _swappers) external onlyRole(ADMIN_ROLE) {
-    for (uint256 i; i < _swappers.length; i++) {
+    for (uint256 i = 0; i < _swappers.length; ) {
       _accountRole[_swappers[i]] = Role.NONE;
+      unchecked {
+        i++;
+      }
     }
     emit RemoveSwappersFromAllowlist(_swappers);
   }
 
   /// @inheritdoc ISwapperRegistry
   function allowSupplementaryAllowanceTargets(address[] calldata _allowanceTargets) external onlyRole(ADMIN_ROLE) {
-    for (uint256 i; i < _allowanceTargets.length; i++) {
+    for (uint256 i = 0; i < _allowanceTargets.length; ) {
       _accountRole[_allowanceTargets[i]] = Role.SUPPLEMENTARY_ALLOWANCE_TARGET;
+      unchecked {
+        i++;
+      }
     }
     emit AllowedSupplementaryAllowanceTargets(_allowanceTargets);
   }
 
   /// @inheritdoc ISwapperRegistry
   function removeSupplementaryAllowanceTargetsFromAllowlist(address[] calldata _allowanceTargets) external onlyRole(ADMIN_ROLE) {
-    for (uint256 i; i < _allowanceTargets.length; i++) {
+    for (uint256 i = 0; i < _allowanceTargets.length; ) {
       _accountRole[_allowanceTargets[i]] = Role.NONE;
+      unchecked {
+        i++;
+      }
     }
     emit RemovedAllowanceTargetsFromAllowlist(_allowanceTargets);
   }
