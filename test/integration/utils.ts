@@ -61,7 +61,9 @@ export async function getQuoteAndAllowlistSwapper({
   const { msig: adminAddress } = await getNamedAccounts();
   const admin = await wallet.impersonate(adminAddress);
   await ethers.provider.send('hardhat_setBalance', [adminAddress, '0xffffffffffffffff']);
-  await registry.connect(admin).allowSwappers([quote.swapperAddress]);
+  if (!(await registry.isSwapperAllowlisted(quote.swapperAddress))) {
+    await registry.connect(admin).allowSwappers([quote.swapperAddress]);
+  }
   if (quote.allowanceTarget !== quote.swapperAddress) {
     await registry.connect(admin).allowSupplementaryAllowanceTargets([quote.allowanceTarget]);
   }

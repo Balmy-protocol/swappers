@@ -90,6 +90,16 @@ describe('SwapperRegistry', () => {
         await expect(tx).to.emit(swapperRegistry, 'AllowedSwappers').withArgs([NOT_ALLOWED_SWAPPER]);
       });
     });
+    when('swapper was already allowed', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapperRegistry.connect(admin),
+          func: 'allowSwappers',
+          args: [[ALLOWED_SWAPPER]],
+          message: `AccountAlreadyHasRole("${ALLOWED_SWAPPER}")`,
+        });
+      });
+    });
     behaviours.shouldBeExecutableOnlyByRole({
       contract: () => swapperRegistry,
       funcAndSignature: 'allowSwappers',
@@ -115,6 +125,16 @@ describe('SwapperRegistry', () => {
         await expect(tx).to.emit(swapperRegistry, 'RemoveSwappersFromAllowlist').withArgs([ALLOWED_SWAPPER]);
       });
     });
+    when('trying to remove an account that was not a swapper', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapperRegistry.connect(admin),
+          func: 'removeSwappersFromAllowlist',
+          args: [[NOT_ALLOWED_SWAPPER]],
+          message: `AccountIsNotSwapper("${NOT_ALLOWED_SWAPPER}")`,
+        });
+      });
+    });
     behaviours.shouldBeExecutableOnlyByRole({
       contract: () => swapperRegistry,
       funcAndSignature: 'removeSwappersFromAllowlist',
@@ -137,6 +157,16 @@ describe('SwapperRegistry', () => {
         await expect(tx).to.emit(swapperRegistry, 'AllowedSupplementaryAllowanceTargets').withArgs([NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]);
       });
     });
+    when('allowance target was already allowed', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapperRegistry.connect(admin),
+          func: 'allowSupplementaryAllowanceTargets',
+          args: [[SUPPLEMENTARY_ALLOWANCE_TARGET]],
+          message: `AccountAlreadyHasRole("${SUPPLEMENTARY_ALLOWANCE_TARGET}")`,
+        });
+      });
+    });
     behaviours.shouldBeExecutableOnlyByRole({
       contract: () => swapperRegistry,
       funcAndSignature: 'allowSupplementaryAllowanceTargets',
@@ -157,6 +187,16 @@ describe('SwapperRegistry', () => {
       });
       then('event is emitted', async () => {
         await expect(tx).to.emit(swapperRegistry, 'RemovedAllowanceTargetsFromAllowlist').withArgs([SUPPLEMENTARY_ALLOWANCE_TARGET]);
+      });
+    });
+    when('trying to remove an account that was not an allowance target', () => {
+      then('reverts with message', async () => {
+        await behaviours.txShouldRevertWithMessage({
+          contract: swapperRegistry.connect(admin),
+          func: 'removeSupplementaryAllowanceTargetsFromAllowlist',
+          args: [[NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET]],
+          message: `AccountIsNotSupplementaryAllowanceTarget("${NOT_ALLOWED_SUPPLEMENTARY_ALLOWANCE_TARGET}")`,
+        });
       });
     });
     behaviours.shouldBeExecutableOnlyByRole({
