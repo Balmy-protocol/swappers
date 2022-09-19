@@ -38,26 +38,38 @@ abstract contract TakeRunSwapsAndTransferMany is SwapAdapter {
     }
 
     // Validate that all swappers are allowlisted
-    for (uint256 i; i < _parameters.swappers.length; i++) {
+    for (uint256 i = 0; i < _parameters.swappers.length; ) {
       _assertSwapperIsAllowlisted(_parameters.swappers[i]);
+      unchecked {
+        i++;
+      }
     }
 
     // Approve whatever is necessary
-    for (uint256 i; i < _parameters.allowanceTargets.length; i++) {
+    for (uint256 i = 0; i < _parameters.allowanceTargets.length; ) {
       Allowance memory _allowance = _parameters.allowanceTargets[i];
       _maxApproveSpenderIfNeeded(_allowance.token, _allowance.allowanceTarget, false, _allowance.minAllowance);
+      unchecked {
+        i++;
+      }
     }
 
     // Execute swaps
-    for (uint256 i; i < _parameters.swaps.length; i++) {
+    for (uint256 i = 0; i < _parameters.swaps.length; ) {
       SwapContext memory _context = _parameters.swapContext[i];
       _executeSwap(_parameters.swappers[_context.swapperIndex], _parameters.swaps[i], _context.value);
+      unchecked {
+        i++;
+      }
     }
 
     // Transfer out whatever was left in the contract
-    for (uint256 i; i < _parameters.transferOutBalance.length; i++) {
+    for (uint256 i = 0; i < _parameters.transferOutBalance.length; ) {
       TransferOutBalance memory _transferOutBalance = _parameters.transferOutBalance[i];
       _sendBalanceOnContractToRecipient(_transferOutBalance.token, _transferOutBalance.recipient);
+      unchecked {
+        i++;
+      }
     }
   }
 }

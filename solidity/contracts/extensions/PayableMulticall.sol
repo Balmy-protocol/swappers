@@ -19,8 +19,11 @@ abstract contract PayableMulticall {
    */
   function multicall(bytes[] calldata _data) external payable returns (bytes[] memory _results) {
     _results = new bytes[](_data.length);
-    for (uint256 i; i < _data.length; i++) {
+    for (uint256 i = 0; i < _data.length; ) {
       _results[i] = Address.functionDelegateCall(address(this), _data[i]);
+      unchecked {
+        i++;
+      }
     }
     return _results;
   }

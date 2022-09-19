@@ -125,10 +125,16 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @param _revokeActions The spenders and tokens to revoke
    */
   function _revokeAllowances(RevokeAction[] calldata _revokeActions) internal virtual {
-    for (uint256 i; i < _revokeActions.length; i++) {
+    for (uint256 i = 0; i < _revokeActions.length; ) {
       RevokeAction memory _action = _revokeActions[i];
-      for (uint256 j; j < _action.tokens.length; j++) {
+      for (uint256 j = 0; j < _action.tokens.length; ) {
         _action.tokens[j].approve(_action.spender, 0);
+        unchecked {
+          j++;
+        }
+      }
+      unchecked {
+        i++;
       }
     }
   }

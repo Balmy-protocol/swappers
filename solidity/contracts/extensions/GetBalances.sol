@@ -19,9 +19,12 @@ abstract contract GetBalances is SwapAdapter {
    */
   function getBalances(address[] calldata _tokens) external view returns (TokenBalance[] memory _balances) {
     _balances = new TokenBalance[](_tokens.length);
-    for (uint256 i; i < _tokens.length; i++) {
+    for (uint256 i = 0; i < _tokens.length; ) {
       uint256 _balance = _tokens[i] == PROTOCOL_TOKEN ? address(this).balance : IERC20(_tokens[i]).balanceOf(address(this));
       _balances[i] = TokenBalance({token: _tokens[i], balance: _balance});
+      unchecked {
+        i++;
+      }
     }
   }
 }
