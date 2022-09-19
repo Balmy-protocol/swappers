@@ -78,17 +78,9 @@ abstract contract SwapAdapter is ISwapAdapter {
    * @param _recipient The recipient of the token balance
    */
   function _sendBalanceOnContractToRecipient(address _token, address _recipient) internal virtual {
-    if (_recipient == address(0)) _recipient = msg.sender;
-    if (_token == PROTOCOL_TOKEN) {
-      uint256 _balance = address(this).balance;
-      if (_balance > 0) {
-        payable(_recipient).sendValue(_balance);
-      }
-    } else {
-      uint256 _balance = IERC20(_token).balanceOf(address(this));
-      if (_balance > 0) {
-        IERC20(_token).safeTransfer(_recipient, _balance);
-      }
+    uint256 _balance = _token == PROTOCOL_TOKEN ? address(this).balance : IERC20(_token).balanceOf(address(this));
+    if (_balance > 0) {
+      _sendToRecipient(_token, _balance, _recipient);
     }
   }
 
