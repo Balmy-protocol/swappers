@@ -56,19 +56,21 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
   }
 
   /// @inheritdoc ISwapperRegistry
-  function isSwapperAllowlisted(address _account) external view returns (bool) {
+  function isSwapperAllowlisted(address _account) public view returns (bool) {
     return _accountRole[_account] == Role.SWAPPER;
   }
 
   /// @inheritdoc ISwapperRegistry
-  function isValidAllowanceTarget(address _account) external view returns (bool) {
+  function isValidAllowanceTarget(address _account) public view returns (bool) {
     return _accountRole[_account] != Role.NONE;
   }
 
   /// @inheritdoc ISwapperRegistry
   function allowSwappers(address[] calldata _swappers) external onlyRole(ADMIN_ROLE) {
     for (uint256 i = 0; i < _swappers.length; ) {
-      _accountRole[_swappers[i]] = Role.SWAPPER;
+      address _swapper = _swappers[i];
+      _assertAccountHasNoRole(_swapper);
+      _accountRole[_swapper] = Role.SWAPPER;
       unchecked {
         i++;
       }
@@ -79,7 +81,9 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
   /// @inheritdoc ISwapperRegistry
   function removeSwappersFromAllowlist(address[] calldata _swappers) external onlyRole(ADMIN_ROLE) {
     for (uint256 i = 0; i < _swappers.length; ) {
-      _accountRole[_swappers[i]] = Role.NONE;
+      address _swapper = _swappers[i];
+      if (!isSwapperAllowlisted(_swapper)) revert AccountIsNotSwapper(_swapper);
+      _accountRole[_swapper] = Role.NONE;
       unchecked {
         i++;
       }
@@ -90,7 +94,9 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
   /// @inheritdoc ISwapperRegistry
   function allowSupplementaryAllowanceTargets(address[] calldata _allowanceTargets) external onlyRole(ADMIN_ROLE) {
     for (uint256 i = 0; i < _allowanceTargets.length; ) {
-      _accountRole[_allowanceTargets[i]] = Role.SUPPLEMENTARY_ALLOWANCE_TARGET;
+      address _allowanceTarget = _allowanceTargets[i];
+      _assertAccountHasNoRole(_allowanceTarget);
+      _accountRole[_allowanceTarget] = Role.SUPPLEMENTARY_ALLOWANCE_TARGET;
       unchecked {
         i++;
       }
@@ -101,11 +107,17 @@ contract SwapperRegistry is AccessControl, ISwapperRegistry {
   /// @inheritdoc ISwapperRegistry
   function removeSupplementaryAllowanceTargetsFromAllowlist(address[] calldata _allowanceTargets) external onlyRole(ADMIN_ROLE) {
     for (uint256 i = 0; i < _allowanceTargets.length; ) {
-      _accountRole[_allowanceTargets[i]] = Role.NONE;
+      address _allowanceTarget = _allowanceTargets[i];
+      if (!isValidAllowanceTarget(_allowanceTarget)) revert AccountIsNotSupplementaryAllowanceTarget(_allowanceTarget);
+      _accountRole[_allowanceTarget] = Role.NONE;
       unchecked {
         i++;
       }
     }
     emit RemovedAllowanceTargetsFromAllowlist(_allowanceTargets);
+  }
+
+  function _assertAccountHasNoRole(address _account) internal view {
+    if (_accountRole[_account] != Role.NONE) revert AccountAlreadyHasRole(_account);
   }
 }

@@ -11,6 +11,18 @@ interface ISwapperRegistry {
   /// @notice Thrown when one of the parameters is a zero address
   error ZeroAddress();
 
+  /// @notice Thrown when trying to remove an account from the swappers list, when it wasn't there before
+  error AccountIsNotSwapper(address account);
+
+  /**
+   * @notice Thrown when trying to remove an account from the supplementary allowance target list,
+   *         when it wasn't there before
+   */
+  error AccountIsNotSupplementaryAllowanceTarget(address account);
+
+  /// @notice Thrown when trying to mark an account as swapper or allowance target, but it already has a role assigned
+  error AccountAlreadyHasRole(address account);
+
   /**
    * @notice Emitted when swappers are removed from the allowlist
    * @param swappers The swappers that were removed
