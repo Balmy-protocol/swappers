@@ -4,6 +4,7 @@ import { evm, wallet } from '@utils';
 import { BigNumber, BigNumberish, constants } from 'ethers';
 import { deployments, ethers, getNamedAccounts } from 'hardhat';
 import { DeterministicFactory, DeterministicFactory__factory } from '@mean-finance/deterministic-factory';
+import { address as DETERMINISTIC_FACTORY_ADDRESS } from '@mean-finance/deterministic-factory/deployments/ethereum/DeterministicFactory.json';
 import { QuoteInput, Quote } from './dex-adapters';
 import { abi as IERC20_ABI } from '@openzeppelin/contracts/build/contracts/IERC20.json';
 import { abi as IERC20_PERMIT_ABI } from '@openzeppelin/contracts/build/contracts/IERC20Permit.json';
@@ -88,16 +89,16 @@ export async function deployContractsAndReturnSigners() {
   return { registry, swapProxy, WETH, USDC, MANA, wethWhale, usdcWhale, manaWhale };
 }
 
-export async function fork({ chain }: { chain: string }): Promise<void> {
+async function fork({ chain }: { chain: string }): Promise<void> {
   await evm.reset({
     network: chain,
   });
-  const { eoaAdmin, deployer } = await getNamedAccounts();
-  const deployerAdmin = await wallet.impersonate(eoaAdmin);
+  const { msig, deployer } = await getNamedAccounts();
+  const deployerAdmin = await wallet.impersonate(msig);
   await wallet.setBalance({ account: deployerAdmin._address, balance: constants.MaxUint256 });
   const deterministicFactory = await ethers.getContractAt<DeterministicFactory>(
     DeterministicFactory__factory.abi,
-    '0xbb681d77506df5CA21D2214ab3923b4C056aa3e2'
+    DETERMINISTIC_FACTORY_ADDRESS
   );
   await deterministicFactory.connect(deployerAdmin).grantRole(await deterministicFactory.DEPLOYER_ROLE(), deployer);
 }
