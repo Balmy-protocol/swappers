@@ -22,19 +22,22 @@ These are different versions of the Swap Adapter, built for different scenarios.
 
 This contract implements all swap extensions, so it can be used by EOAs or other contracts that do not have the extensions.
 
-## Package
+## 🔒 Audits
+
+Oracles has been audited by [Omniscia](https://omniscia.io/) and can be find [here](https://omniscia.io/reports/mean-finance-swappers-module).
+
+## 📦 NPM/YARN Package
 
 The package will contain:
 
 - Artifacts can be found under `@mean-finance/swappers/artifacts`
-- Compatible deployments for [hardhat-deploy](https://github.com/wighawag/hardhat-deploy) plugin under the `@mean-finance/swappers/deployments` folder.
 - Typescript smart contract typings under `@mean-finance/swappers/typechained`
 
-## Documentation
+## 📚 Documentation
 
 Everything that you need to know as a developer on how to use all repository smart contracts can be found in the [documented interfaces](./solidity/interfaces/).
 
-## Installation
+## 🛠 Installation
 
 To install with [**Hardhat**](https://github.com/nomiclabs/hardhat) or [**Truffle**](https://github.com/trufflesuite/truffle):
 
@@ -49,3 +52,12 @@ yarn add @mean-finance/swappers
 ```sh
 npm install @mean-finance/swappers
 ```
+
+## 📖 Deployment Registry
+
+Contracts are deployed at the same address on all available networks via the [deterministic contract factory](https://github.com/Mean-Finance/deterministic-factory)
+
+> Available networks: Optimism, Arbitrum One, Polygon.
+
+- SwapperRegistry: `0xd6C8fd8100252F0a314407C26e7A47286F7Fda24`
+- SwapProxy: `0xca341351FA4D98a3EE7eb688796B796603128d85`
