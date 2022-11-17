@@ -1,6 +1,6 @@
 {
   "name": "@mean-finance/swappers",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Mean Swappers",
   "keywords": [
     "ethereum",
@@ -57,7 +57,7 @@
     "test:all": "yarn test './test/integration/**/*.spec.ts' && cross-env TEST=true mocha 'test/unit/**/*.spec.ts'",
     "test:e2e": "yarn test './test/e2e/**/*.spec.ts'",
     "test:gas": "cross-env REPORT_GAS=1 npx hardhat test",
-    "test:integration": "yarn test './test/integration/**/*.spec.ts'",
+    "test:integration": "USE_RANDOM_SALT=true yarn test './test/integration/**/*.spec.ts'",
     "test:unit": "yarn test 'test/unit/**/*.spec.ts'",
     "transpile": "rm -rf dist && npx tsc -p tsconfig.publish.json"
   },
@@ -73,7 +73,7 @@
   },
   "dependencies": {
     "@0xged/hardhat-deploy": "0.11.5",
-    "@mean-finance/deterministic-factory": "1.5.1",
+    "@mean-finance/deterministic-factory": "1.6.0",
     "@openzeppelin/contracts": "4.7.3"
   },
   "devDependencies": {
