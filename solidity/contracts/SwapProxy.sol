@@ -5,7 +5,7 @@ import './extensions/TakeAndRunSwap.sol';
 import './extensions/TakeRunSwapAndTransfer.sol';
 import './extensions/TakeRunSwapsAndTransferMany.sol';
 import './extensions/TakeManyRunSwapAndTransferMany.sol';
-import './extensions/TakeManyRunSwapsAndTransferMany.sol';
+import './extensions/TakeManyRunSwapsAndTransferManyCompressed.sol';
 import './extensions/CollectableWithGovernor.sol';
 import './extensions/RevokableWithGovernor.sol';
 import './extensions/GetBalances.sol';
@@ -20,7 +20,7 @@ contract SwapProxy is
   TakeRunSwapAndTransfer,
   TakeRunSwapsAndTransferMany,
   TakeManyRunSwapAndTransferMany,
-  TakeManyRunSwapsAndTransferMany,
+  TakeManyRunSwapsAndTransferManyCompressed,
   CollectableWithGovernor,
   RevokableWithGovernor,
   GetBalances,

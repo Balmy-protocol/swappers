@@ -11,7 +11,7 @@ const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnviro
   await deployThroughDeterministicFactory({
     deployer,
     name: 'SwapProxy',
-    salt: 'MF-Swap-Proxy-V1',
+    salt: 'MF-Swap-Proxy-V1.1',
     contract: 'solidity/contracts/SwapProxy.sol:SwapProxy',
     bytecode,
     constructorArgs: {
@@ -22,7 +22,7 @@ const deployFunction: DeployFunction = async function (hre: HardhatRuntimeEnviro
     overrides: !!process.env.COVERAGE
       ? {}
       : {
-          gasLimit: 3_000_000,
+          gasLimit: 30_000_000,
         },
   });
 };
