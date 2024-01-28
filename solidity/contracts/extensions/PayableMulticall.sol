@@ -2,7 +2,7 @@
 
 pragma solidity >=0.8.7 <0.9.0;
 
-import '@openzeppelin/contracts/utils/Address.sol';
+import '@openzeppelin/contracts-4.7.3/utils/Address.sol';
 
 /**
  * @dev Adding this contract will enable batching calls. This is basically the same as Open Zeppelin's

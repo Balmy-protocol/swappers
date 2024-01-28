@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.8.7 <0.9.0;
 
-import '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
-import '@openzeppelin/contracts/utils/Address.sol';
+import '@openzeppelin/contracts-4.7.3/token/ERC20/utils/SafeERC20.sol';
+import '@openzeppelin/contracts-4.7.3/utils/Address.sol';
 import '../interfaces/ISwapAdapter.sol';
 
 abstract contract SwapAdapter is ISwapAdapter {
