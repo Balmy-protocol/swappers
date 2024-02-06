@@ -1,129 +1,40 @@
 {
   "name": "@mean-finance/swappers",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Mean Swappers",
-  "keywords": [
-    "ethereum",
-    "smart",
-    "contracts",
-    "test",
-    "solidity",
-    "hardhat",
-    "swap",
-    "swappers",
-    "proxy",
-    "dex"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mean-finance/swappers.git"
-  },
-  "license": "AGPL-3.0-only",
-  "contributors": [
-    {
-      "name": "0xsambugs",
-      "url": "https://github.com/0xsambugs"
-    }
-  ],
-  "main": "dist",
-  "types": "dist",
-  "files": [
-    "solidity",
-    "!solidity/contracts/test/**",
-    "artifacts/solidity/**/*.json",
-    "!artifacts/solidity/contracts/test/**",
-    "!artifacts/solidity/**/**/*.dbg.json",
-    "!/**/*test*",
-    "!/**/*Mock*",
-    "deploy",
-    "!.env",
-    "!**/.DS_Store"
-  ],
-  "scripts": {
-    "compile": "hardhat compile",
-    "compile:test": "cross-env TEST=true hardhat compile",
-    "coverage": "TS_NODE_SKIP_IGNORE=true TEST=true COVERAGE=true npx hardhat coverage --solcoverjs ./solcover.js",
-    "deploy": "npx hardhat deploy",
-    "fork:node": "cross-env FORK=true hardhat node",
-    "fork:script": "cross-env FORK=true hardhat run",
-    "postinstall": "husky install && yarn compile:test",
-    "lint:check": "cross-env solhint 'contracts/**/*.sol' 'interfaces/**/*.sol' && cross-env prettier --check './**'",
-    "lint:fix": "sort-package-json && cross-env prettier --write './**' && cross-env solhint --fix 'contracts/**/*.sol' 'interfaces/**/*.sol'",
-    "prepare": "husky install",
-    "prepublishOnly": "hardhat clean && PUBLISHING_NPM=true hardhat compile && yarn transpile && pinst --disable",
-    "postpublish": "pinst --enable",
-    "release": "standard-version",
-    "test": "yarn compile:test && cross-env TEST=true mocha",
-    "test:all": "yarn test './test/integration/**/*.spec.ts' && cross-env TEST=true mocha 'test/unit/**/*.spec.ts'",
-    "test:e2e": "yarn test './test/e2e/**/*.spec.ts'",
-    "test:gas": "cross-env REPORT_GAS=1 npx hardhat test",
-    "test:integration": "USE_RANDOM_SALT=true yarn test './test/integration/**/*.spec.ts'",
-    "test:unit": "yarn test 'test/unit/**/*.spec.ts'",
-    "transpile": "rm -rf dist && npx tsc -p tsconfig.publish.json"
-  },
-  "lint-staged": {
-    "*.{js,css,md,ts,sol,json}": "prettier --write",
-    "*.sol": "cross-env solhint --fix 'contracts/**/*.sol' 'interfaces/**/*.sol'",
-    "package.json": "sort-package-json"
-  },
-  "resolutions": {
-    "cli-table3@^0.5.0/colors": "1.4.0",
-    "cli-table@^0.3.1/colors": "1.0.3",
-    "eth-gas-reporter/colors": "1.4.0"
-  },
-  "dependencies": {
-    "@0xged/hardhat-deploy": "0.11.5",
-    "@mean-finance/deterministic-factory": "1.10.0",
-    "@openzeppelin/contracts": "4.7.3"
+  "author": {
+    "name": "Mean-Finance",
+    "url": "https://github.com/Mean-Finance"
   },
   "devDependencies": {
-    "@codechecks/client": "0.1.12",
-    "@commitlint/cli": "16.2.4",
-    "@commitlint/config-conventional": "16.2.4",
-    "@defi-wonderland/smock": "2.2.0",
-    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@0.3.0-beta.13",
-    "@nomiclabs/hardhat-etherscan": "3.1.0",
-    "@nomiclabs/hardhat-waffle": "2.0.3",
-    "@openzeppelin/test-helpers": "0.5.15",
-    "@typechain/ethers-v5": "10.1.0",
-    "@typechain/hardhat": "6.1.2",
-    "@types/axios": "0.14.0",
-    "@types/chai": "4.3.1",
-    "@types/chai-as-promised": "7.1.5",
-    "@types/lodash": "4.14.182",
-    "@types/mocha": "9.1.1",
-    "@types/node": "17.0.31",
-    "axios": "0.27.2",
-    "axios-retry": "3.3.1",
-    "bignumber.js": "9.0.2",
-    "chai": "4.3.6",
-    "chai-as-promised": "7.1.1",
-    "cross-env": "7.0.3",
-    "dotenv": "16.0.0",
-    "ethereum-waffle": "3.4.4",
-    "ethers": "5.6.5",
-    "hardhat": "2.9.3",
-    "hardhat-gas-reporter": "1.0.8",
-    "hardhat-preprocessor": "0.1.4",
-    "husky": "7.0.4",
-    "lint-staged": "12.4.1",
-    "lodash": "4.17.21",
-    "mocha": "10.0.0",
-    "moment": "2.29.3",
-    "pinst": "3.0.0",
-    "prettier": "2.6.2",
-    "prettier-plugin-solidity": "1.0.0-beta.19",
-    "solc-0.8": "npm:solc@0.8.13",
-    "solhint": "3.3.7",
-    "solhint-plugin-prettier": "0.0.5",
-    "solidity-coverage": "https://github.com/adjisb/solidity-coverage",
-    "solidity-docgen": "0.5.16",
-    "sort-package-json": "1.57.0",
-    "standard-version": "9.3.2",
-    "ts-node": "10.7.0",
-    "tsconfig-paths": "4.0.0",
-    "typechain": "8.1.0",
-    "typescript": "4.6.4"
+    "forge-std": "github:foundry-rs/forge-std#1d9650e951204a0ddce9ff89c32f1997984cef4d",
+    "@prb/test": "github:PaulRBerg/prb-test#8d76ad63d1bfa0b16bb880cfe4620a9e7e6aaa19",
+    "@openzeppelin": "github:OpenZeppelin/openzeppelin-contracts#9ef69c03d13230aeff24d91cb54c9d24c4de7c8b",
+    "@mean-finance/call-simulation": "github:mean-finance/call-simulation#a510c80c7e81480eb5806422101d199a39662024",
+    "@mean-finance/permit2-adapter": "github:mean-finance/permit2-adapter#495c409",
+    "prettier": "^2.8.7",
+    "solhint-community": "^3.5.0"
+  },
+  "files": [
+    "contracts"
+  ],
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "forge",
+    "foundry",
+    "smart-contracts",
+    "solidity",
+    "template"
+  ],
+  "scripts": {
+    "clean": "rm -rf cache out",
+    "lint": "pnpm lint:sol && pnpm prettier:check",
+    "lint:sol": "forge fmt --check && pnpm solhint \"{script,src,test}/**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.{json,md,yml}\"",
+    "prettier:write": "prettier --write \"**/*.{json,md,yml}\"",
+    "prepublishOnly": "cp -r ./src ./contracts",
+    "postpublish": "rm -r ./contracts"
   },
   "publishConfig": {
     "access": "public"

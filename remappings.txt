@@ -1,0 +1,7 @@
+@prb/test/=node_modules/@prb/test/src
+ds-test/=node_modules/ds-test/src
+forge-std/=node_modules/forge-std/src
+src/=src/
+@openzeppelin/=node_modules/@openzeppelin/
+@call-simulation/=node_modules/@mean-finance/call-simulation/src/
+@mean-finance/permit2-adapter/=node_modules/@mean-finance/permit2-adapter/

@@ -1,29 +1,16 @@
-# General
-dist
-.prettierignore
-.solhintignore
-.husky
-.gitignore
-.gitattributes
-.env.example
-.env
-workspace.code-workspace
-.DS_STORE
-LICENSE
-codechecks.yml
-
-# Hardhat
-coverage
-coverage.json
-artifacts
+# directories
+broadcast
 cache
-typechained
-deployments
-
-# JS
+lib
 node_modules
-package-lock.json
-yarn.lock
+out
 
-# Solidity
-contracts/mock
+# files
+*.env
+*.log
+.DS_Store
+.pnp.*
+lcov.info
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
