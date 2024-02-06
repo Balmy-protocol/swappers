@@ -2,20 +2,13 @@
 dist
 node_modules
 .DS_STORE
+cache
+node_modules
+out
 
 # Coverage
 coverage.json
 coverage
-
-# ETH-SDK
-eth-sdk/abis
-
-# Hardhat files
-cache
-artifacts
-typechained
-deployments/hardhat
-deployments/localhost
 
 # Config files
 .env
