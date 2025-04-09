@@ -5,12 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 devDependencies:
-  '@mean-finance/call-simulation':
-    specifier: github:mean-finance/call-simulation#a510c80c7e81480eb5806422101d199a39662024
-    version: github.com/mean-finance/call-simulation/a510c80c7e81480eb5806422101d199a39662024
-  '@mean-finance/permit2-adapter':
-    specifier: github:mean-finance/permit2-adapter#495c409
-    version: github.com/mean-finance/permit2-adapter/495c409
+  '@balmy/call-simulation':
+    specifier: github:balmy-protocol/call-simulation#a510c80c7e81480eb5806422101d199a39662024
+    version: github.com/balmy-protocol/call-simulation/a510c80c7e81480eb5806422101d199a39662024
+  '@balmy/permit2-adapter':
+    specifier: github:balmy-protocol/permit2-adapter#495c409
+    version: github.com/balmy-protocol/permit2-adapter/495c409
   '@openzeppelin':
     specifier: github:OpenZeppelin/openzeppelin-contracts#9ef69c03d13230aeff24d91cb54c9d24c4de7c8b
     version: github.com/OpenZeppelin/openzeppelin-contracts/9ef69c03d13230aeff24d91cb54c9d24c4de7c8b
@@ -479,20 +479,20 @@ packages:
     version: 0.6.1
     dev: true
 
-  github.com/foundry-rs/forge-std/1d9650e951204a0ddce9ff89c32f1997984cef4d:
-    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/1d9650e951204a0ddce9ff89c32f1997984cef4d}
-    name: forge-std
-    version: 1.6.0
-    dev: true
-
-  github.com/mean-finance/call-simulation/a510c80c7e81480eb5806422101d199a39662024:
-    resolution: {tarball: https://codeload.github.com/mean-finance/call-simulation/tar.gz/a510c80c7e81480eb5806422101d199a39662024}
+  github.com/balmy-protocol/call-simulation/a510c80c7e81480eb5806422101d199a39662024:
+    resolution: {tarball: https://codeload.github.com/balmy-protocol/call-simulation/tar.gz/a510c80c7e81480eb5806422101d199a39662024}
     name: '@mean-finance/call-simulation'
     version: 0.0.2
     dev: true
 
-  github.com/mean-finance/permit2-adapter/495c409:
-    resolution: {tarball: https://codeload.github.com/mean-finance/permit2-adapter/tar.gz/495c409}
+  github.com/balmy-protocol/permit2-adapter/495c409:
+    resolution: {tarball: https://codeload.github.com/balmy-protocol/permit2-adapter/tar.gz/495c409}
     name: '@mean-finance/permit2-adapter'
     version: 1.0.0
+    dev: true
+
+  github.com/foundry-rs/forge-std/1d9650e951204a0ddce9ff89c32f1997984cef4d:
+    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/1d9650e951204a0ddce9ff89c32f1997984cef4d}
+    name: forge-std
+    version: 1.6.0
     dev: true

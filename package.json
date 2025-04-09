@@ -1,17 +1,17 @@
 {
-  "name": "@mean-finance/swappers",
+  "name": "@balmy-protocol/swappers",
   "version": "2.0.0",
-  "description": "Mean Swappers",
+  "description": "Balmy Swappers",
   "author": {
-    "name": "Mean-Finance",
-    "url": "https://github.com/Mean-Finance"
+    "name": "Balmy-Protocol",
+    "url": "https://github.com/Balmy-Protocol"
   },
   "devDependencies": {
     "forge-std": "github:foundry-rs/forge-std#1d9650e951204a0ddce9ff89c32f1997984cef4d",
     "@prb/test": "github:PaulRBerg/prb-test#8d76ad63d1bfa0b16bb880cfe4620a9e7e6aaa19",
     "@openzeppelin": "github:OpenZeppelin/openzeppelin-contracts#9ef69c03d13230aeff24d91cb54c9d24c4de7c8b",
-    "@mean-finance/call-simulation": "github:mean-finance/call-simulation#a510c80c7e81480eb5806422101d199a39662024",
-    "@mean-finance/permit2-adapter": "github:mean-finance/permit2-adapter#495c409",
+    "@balmy/call-simulation": "github:balmy-protocol/call-simulation#a510c80c7e81480eb5806422101d199a39662024",
+    "@balmy/permit2-adapter": "github:balmy-protocol/permit2-adapter#495c409",
     "prettier": "^2.8.7",
     "solhint-community": "^3.5.0"
   },

@@ -1,10 +1,10 @@
-[![Lint](https://github.com/Mean-Finance/swappers/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/Mean-Finance/swappers/actions/workflows/lint.yml)
-[![Tests](https://github.com/Mean-Finance/swappers/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Mean-Finance/swappers/actions/workflows/tests.yml)
-[![Slither Analysis](https://github.com/Mean-Finance/swappers/actions/workflows/slither.yml/badge.svg?branch=main)](https://github.com/Mean-Finance/swappers/actions/workflows/slither.yml)
+[![Lint](https://github.com/Balmy-Protocol/swappers/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/Balmy-Protocol/swappers/actions/workflows/lint.yml)
+[![Tests](https://github.com/Balmy-Protocol/swappers/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Balmy-Protocol/swappers/actions/workflows/tests.yml)
+[![Slither Analysis](https://github.com/Balmy-Protocol/swappers/actions/workflows/slither.yml/badge.svg?branch=main)](https://github.com/Balmy-Protocol/swappers/actions/workflows/slither.yml)
 
-# Mean Finance Swappers
+# Balmy Swappers
 
-This repository holds Mean's swapping infra:
+This repository holds Balmy's swapping infra:
 
 ## 1. The Swap Proxy
 
