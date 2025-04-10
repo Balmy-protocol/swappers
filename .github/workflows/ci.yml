@@ -26,22 +26,18 @@ jobs:
         with:
           version: nightly
 
-      - name: "Install Pnpm"
-        uses: "pnpm/action-setup@v2"
-        with:
-          version: "8"
-
       - name: "Install Node.js"
         uses: "actions/setup-node@v3"
         with:
-          cache: "pnpm"
-          node-version: "lts/*"
+          node-version: "20.12.2"
+          cache: yarn
+          cache-dependency-path: "**/yarn.lock"
 
-      - name: "Install the Node.js dependencies"
-        run: "pnpm install"
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
 
       - name: "Lint the contracts"
-        run: "pnpm lint"
+        run: "yarn lint"
 
       - name: "Add lint summary"
         run: |
@@ -59,19 +55,15 @@ jobs:
         with:
           version: nightly
 
-      - name: "Install Pnpm"
-        uses: "pnpm/action-setup@v2"
-        with:
-          version: "8"
-
       - name: "Install Node.js"
         uses: "actions/setup-node@v3"
         with:
-          cache: "pnpm"
-          node-version: "lts/*"
+          node-version: "20.12.2"
+          cache: yarn
+          cache-dependency-path: "**/yarn.lock"
 
-      - name: "Install the Node.js dependencies"
-        run: "pnpm install"
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
 
       - name: "Build the contracts"
         run: "forge build"
@@ -115,19 +107,15 @@ jobs:
       - name: "Check out the repo"
         uses: "actions/checkout@v3"
 
-      - name: "Install Pnpm"
-        uses: "pnpm/action-setup@v2"
-        with:
-          version: "8"
-
       - name: "Install Node.js"
         uses: "actions/setup-node@v3"
         with:
-          cache: "pnpm"
-          node-version: "lts/*"
+          node-version: "20.12.2"
+          cache: yarn
+          cache-dependency-path: "**/yarn.lock"
 
-      - name: "Install the Node.js dependencies"
-        run: "pnpm install"
+      - name: Install dependencies
+        run: yarn --frozen-lockfile
 
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
