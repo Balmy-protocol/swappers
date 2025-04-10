@@ -3,5 +3,5 @@ ds-test/=node_modules/ds-test/src
 forge-std/=node_modules/forge-std/src
 src/=src/
 @openzeppelin/=node_modules/@openzeppelin/
-@call-simulation/=node_modules/@mean-finance/call-simulation/src/
-@mean-finance/permit2-adapter/=node_modules/@mean-finance/permit2-adapter/
+@call-simulation/=node_modules/@balmy/call-simulation/src/
+@balmy/permit2-adapter/=node_modules/@balmy/permit2-adapter/

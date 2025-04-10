@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.22;
 
-import { BasePermit2Adapter } from "@mean-finance/permit2-adapter/src/base/BasePermit2Adapter.sol";
-import { MockPermit2 } from "@mean-finance/permit2-adapter/test/unit/mocks/MockPermit2.sol";
+import { BasePermit2Adapter } from "@balmy/permit2-adapter/src/base/BasePermit2Adapter.sol";
+import { MockPermit2 } from "@balmy/permit2-adapter/test/unit/mocks/MockPermit2.sol";
 
 contract Permit2AdapterMock is BasePermit2Adapter {
   error BadAddressIsNotAToken();
